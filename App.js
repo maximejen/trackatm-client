@@ -1,14 +1,35 @@
 import React from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
-import { AppLoading, Asset, Font, Icon } from 'expo';
-import AppNavigator from './navigation/AppNavigator';
 
+import {
+  createStackNavigator,
+  createAppContainer
+} from 'react-navigation';
+import HomeScreen from './screens/HomeScreen';
+import LoginScreen from './screens/LoginScreen'
+import AuthLoadingScreen from './screens/AuthLoadingScreen'
+
+const MainNavigator = createStackNavigator({
+    AuthLoadingScreen: {screen: AuthLoadingScreen},
+    Login: {screen: LoginScreen},
+    Home: {screen: HomeScreen}},{
+      initialRouteName: "AuthLoadingScreen",
+      defaultNavigationOptions: {
+        gesturesEnabled: false
+      }
+});
+
+const App = createAppContainer(MainNavigator);
+export default App;
+/*
 export default class App extends React.Component {
   state = {
     isLoadingComplete: false,
   };
 
   render() {
+  <Login />
+  <Home />
+
     if (!this.state.isLoadingComplete && !this.props.skipLoadingScreen) {
       return (
         <AppLoading
@@ -52,11 +73,11 @@ export default class App extends React.Component {
   _handleFinishLoading = () => {
     this.setState({ isLoadingComplete: true });
   };
-}
-
+}*/
+/*
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
   },
-});
+});*/
