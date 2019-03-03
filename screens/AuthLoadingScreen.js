@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import config from "../constants/Config";
 
-export default class AuthLoadingScreen extends React.Component {
+class AuthLoadingScreen extends React.Component {
     static navigationOptions = {
         header: null
     };
@@ -19,6 +19,7 @@ export default class AuthLoadingScreen extends React.Component {
 
     _bootstrapAsync = async () => {
         const userToken = await AsyncStorage.getItem('token');
+        const {navigate} = this.props.navigation;
 
         if (!userToken)
             this.props.navigation.navigate('Login');
@@ -28,7 +29,7 @@ export default class AuthLoadingScreen extends React.Component {
             .then((response) => response.json())
             .then((responseJson) => {
                 console.log(responseJson);
-                this.props.navigation.navigate(responseJson.success ? 'Home' : 'Login');
+                navigate(responseJson.success ? 'Home' : 'Login');
             })
             .catch((error) => {
                 console.error(error);
@@ -54,6 +55,8 @@ export default class AuthLoadingScreen extends React.Component {
         );
     }
 }
+
+export default AuthLoadingScreen
 const styles = StyleSheet.create({
     content: {
         backgroundColor: 'rgba(0, 0, 0, 0.6)',

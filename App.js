@@ -7,10 +7,16 @@ import {
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen'
 import AuthLoadingScreen from './screens/AuthLoadingScreen'
+import JobInformationsScreen from "./screens/JobInformations";
+import TasksScreen from "./screens/TasksScreen";
+import TaskCamera from "./screens/TaskCamera";
 
 const MainNavigator = createStackNavigator({
     AuthLoadingScreen: {screen: AuthLoadingScreen},
     Login: {screen: LoginScreen},
+    JobInformation: {screen: JobInformationsScreen},
+    Tasks: {screen: TasksScreen},
+    TaskCamera: {screen: TaskCamera},
     Home: {screen: HomeScreen}},{
       initialRouteName: "AuthLoadingScreen",
       defaultNavigationOptions: {
