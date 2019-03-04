@@ -11,7 +11,7 @@ import {
     SectionList,
     Linking
 } from 'react-native';
-import { MapView } from 'expo';
+import { MapView, Location, Permissions } from 'expo';
 import { Button } from 'react-native-elements';
 
 export default class JobInformations extends React.Component {
@@ -21,10 +21,31 @@ export default class JobInformations extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = ({job: this.props.navigation.state.params.job});
+        this.state = ({
+            job: this.props.navigation.state.params.job,
+        });
         this.updateTitle(this.state.job.atm_name + ' - ' + this.state.job.bank_name);
-        console.log(this.state.job)
     }
+
+    componentWillMount() {
+        this._getLocationAsync();
+
+    }
+    _getLocationAsync = async () => {
+        let { status } = await Permissions.askAsync(Permissions.LOCATION);
+        if (status !== 'granted') {
+            this.setState({
+                errorMessage: 'Permission to access location was denied',
+            });
+        }
+        let positions = {
+            latitude: this.state.job.lat,
+            longitude: this.state.job.long
+        };
+        let location = await Location.reverseGeocodeAsync(positions);
+        this.setState({ location: location[0]});
+    };
+
 
     updateTitle(title) {
         this.props.navigation.setParams({
@@ -50,57 +71,123 @@ export default class JobInformations extends React.Component {
     renderButtonTasks() {
         const {navigate} = this.props.navigation;
         if (this.state.job.type !== 'done') {
-            return (  <Button
-                title="Complete tasks"
-                type="outline"
-                onPress={() => navigate('Tasks', {job: this.state.job})}
-            />)
+            return (
+                <View style={styles.buttonOpenMap}>
+                    <Button
+                        title="Complete tasks"
+                        type="solid"
+                        onPress={() => navigate('Tasks', {job: this.state.job})}
+                    /></View>)
         }
+    }
+
+    renderAdress() {
+        if (this.state.location) {
+            return (
+                <View>
+                    <Text style={styles.textTitle}>location address</Text>
+                    <Text style={styles.textData}>{this.state.location.name} {this.state.location.postalCode} {this.state.location.city}</Text>
+                </View>
+            )
+        }
+    }
+
+    renderBorderLine() {
+        return (
+            <View style={{margin: '3%'}}>
+            <View
+                style={{
+                    borderBottomColor: '#4158d6',
+                    borderBottomWidth: 1,
+                }}
+            />
+            </View>
+        )
     }
 
     render () {
         return (
-            <View style={{ flex: 1, position: 'relative'  }}>
-                <View style={{ width: '100%', height: '30%', position: 'relative'  }}>
-                    <MapView style={styles.map}
-                             initialRegion={{
-                                 latitude: this.state.job.lat,
-                                 longitude: this.state.job.long,
-                                 latitudeDelta: 0.05,
-                                 longitudeDelta: 0.05   ,
-                             }}
-                    >
-                        <MapView.Marker
-                            coordinate={{latitude: this.state.job.lat,
-                                longitude: this.state.job.long}}
-                            title={this.state.job.bank_name}
-                            description={this.state.job.atm_name}
-                        />
-                    </MapView>
-                </View>
-                <View style={{ flex: 1, position: 'relative'  }}>
-                    <Button
-                        title="open with google maps"
-                        type="outline"
-                        onPress={this._handleOpenWithLinking}
+            <ScrollView style={{ flex: 1}}>
+                <MapView style={styles.map}
+                         initialRegion={{
+                             latitude: this.state.job.lat,
+                             longitude: this.state.job.long,
+                             latitudeDelta: 0.005,
+                             longitudeDelta: 0.005   ,
+                         }}
+                >
+                    <MapView.Marker
+                        coordinate={{latitude: this.state.job.lat,
+                            longitude: this.state.job.long}}
+                        title={this.state.job.bank_name}
+                        description={this.state.job.atm_name}
                     />
-                   {this.renderButtonTasks()}
+                </MapView>
+                <View style={{ flex: 1, position: 'relative'}}>
+                    <View style={styles.buttonOpenMap}>
+                        <Button
+                            title="open with google maps"
+                            type="solid"
+                            onPress={this._handleOpenWithLinking}
+                        />
+                    </View>
+                    <View>
+                        {this.renderAdress()}
+                        {this.renderBorderLine()}
+                        <Text style={styles.textTitle}>Last cleaning</Text>
+                        <Text style={styles.textData}>{this.state.job.lastClean}</Text>
+                        {this.renderBorderLine()}
+                        <Text style={styles.textTitle}>Next cleaning</Text>
+                        <Text style={styles.textData}>{this.state.job.nextClean}</Text>
+                        {this.renderBorderLine()}
+                        {this.renderButtonTasks()}
+                    </View>
                 </View>
-            </View>
+            </ScrollView>
         )
     }
 }
 
 var styles = StyleSheet.create({
 
+    textTitle: {
+        fontSize: 16,
+        color: '#ada8a3',
+        paddingTop: '2%',
+        paddingLeft: '3%',
+        paddingRight: '3%'
+    },
+    textData: {
+        fontSize: 16,
+        paddingLeft: '3%',
+        paddingRight: '3%'
+    },
+    textAddress: {
+        width: '100%',
+        height: '40%',
+        paddingLeft: '2%',
+    },
+    buttonOpenMap: {
+        paddingTop: '2%',
+        marginLeft: '3%',
+        marginRight: '3%'
+    },
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#F5FCFF',
     },
     map: {
-        position: 'absolute',
+        alignItems: 'center',
+        overflow: 'hidden',
+        alignSelf: 'center',
+        borderRadius: 8,
+        shadowOpacity: 0.4,
+        elevation: 1.5,
+        marginTop: 5,
+        marginBottom: 5,
+        shadowRadius: 1,
+        shadowOffset: {height: 2, width: 0},
+        height: '95%',
+        width: '95%',
         top: 0,
         left: 0,
         right: 0,

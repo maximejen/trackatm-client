@@ -107,7 +107,9 @@ class HomeScreen extends React.Component {
                                         lat: 48.576678,
                                         long: 7.749236,
                                         avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-                                        type: "important"
+                                        type: "important",
+                                        lastClean: "03-03-2018",
+                                        nextClean: "07-03-2018"
 
                                     },
                                 ]},
@@ -118,7 +120,9 @@ class HomeScreen extends React.Component {
                                     lat: 48.576678,
                                     long: 7.749236,
                                     avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-                                    type: "today"
+                                    type: "today",
+                                    lastClean: "02-03-2018",
+                                    nextClean: "05-03-2018"
 
                                 },
                                 {
@@ -127,7 +131,9 @@ class HomeScreen extends React.Component {
                                     lat: 48.613675,
                                     long: 7.752227,
                                     avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-                                    type: "today"
+                                    type: "today",
+                                    lastClean: "03-03-2018",
+                                    nextClean: "10-03-2018"
 
                                 },
                             ]},
@@ -138,7 +144,9 @@ class HomeScreen extends React.Component {
                                     lat: 48.576678,
                                     long: 7.749236,
                                     avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-                                    type: "done"
+                                    type: "done",
+                                    lastClean: "03-03-2018",
+                                    nextClean: "07-03-2018"
 
                                 },
                                 {
@@ -147,7 +155,9 @@ class HomeScreen extends React.Component {
                                     lat: 48.576678,
                                     long: 7.749236,
                                     avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-                                    type: "done"
+                                    type: "done",
+                                    lastClean: "03-03-2018",
+                                    nextClean: "07-03-2018"
 
                                 },
                             ]},
@@ -159,7 +169,10 @@ class HomeScreen extends React.Component {
                         />}
                     renderItem={this.renderItems}
                     renderSectionHeader={({section: {title}}) => (
-                        <Text style={{fontWeight: 'bold'}}>{title}</Text>)}
+                        <View style={{justifyContent: 'alignItem'}}>
+                            <Text style={{fontWeight: 'bold', textAlign: 'center'}}>{title}</Text>
+                        </View>
+                    )}
                     keyExtractor={(item, index) => index}
 
                 />
@@ -173,7 +186,6 @@ export default withNavigation(HomeScreen);
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingTop: 22
     },
     sectionHeaderImportant: {
         paddingTop: 2,
