@@ -78,6 +78,7 @@ export default class LoginScreen extends React.Component {
                                 onChangeText={(text) => this.setState({username: text})}
                             />
                             <Input
+                                secureTextEntry={true}
                                 placeholder=' Password'
                                 shake={true}
                                 onChangeText={(text) => this.setState({password: text})}
