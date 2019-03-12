@@ -1,3 +1,3 @@
 export default {
-   server_addr: "http://13ea2f9c.ngrok.io"
+   server_addr: "https://88381d3b.ngrok.io"
 };

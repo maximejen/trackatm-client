@@ -9,7 +9,11 @@ import {
 import { Camera, Permissions } from 'expo';
 import { CheckBox } from 'react-native-elements'
 
-export default class TasksScreen extends React.Component {
+import TaskInputText from '../components/TaskInputText'
+import TaskInputPicture from '../components/TaskInputPicture'
+import {withNavigation} from "react-navigation";
+
+class TasksScreen extends React.Component {
     static navigationOptions = {
         title: 'Tasks',
     };
@@ -18,13 +22,42 @@ export default class TasksScreen extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = ({job: this.props.navigation.state.params.job});
+        this.handleChecked = this.handleChecked.bind(this);
+        this.handleText = this.handleText.bind(this);
+        this.state = ({job: this.props.navigation.state.params.job,
+            data: [
+                    {id: 0,type: 'Text', key:'Good condition', checked: false, text: ""},
+        {id: 1, type: 'Text', key:'Enough money But i dont care', checked: true, text: ""},
+        {id: 2,type: 'Picture', key:'Image of atm before check', checked: false, text: ""}
+    ]
+        });
+    }
+
+    handleText(id, text){
+        var data = this.state.data;
+        data[id].text = text;
+        this.setState({
+            data: data
+        });
+    }
+
+    handleChecked(id) {
+        var data = this.state.data;
+        data[id].checked = !data[id].checked
+        this.setState({
+            data: data
+        });
     }
 
     renderText(item) {
-        return (<CheckBox
+
+        return (<TaskInputText
             title={item.key}
             checked={item.checked}
+            id={item.id}
+            item={item}
+            handleChecked = {this.handleChecked}
+            handleText = {this.handleText}
             iconRight
             onPress={() => item.checked = !item.checked}
         />)
@@ -33,13 +66,16 @@ export default class TasksScreen extends React.Component {
     renderPicture(item) {
         return (
             <View>
-                <CheckBox
+                <TaskInputPicture
                     title={item.key}
                     checked={item.checked}
+                    id={item.id}
+                    item={item}
+                    handleChecked = {this.handleChecked}
+                    handleText = {this.handleText}
                     iconRight
                     onPress={() => item.checked = !item.checked}
                 />
-                <Text>Hello</Text>
             </View>
         )
     }
@@ -57,17 +93,15 @@ export default class TasksScreen extends React.Component {
         return (
             <View style={styles.container}>
                 <FlatList
-                    data={[
-                        {type: 'Text', key:'Good condition', checked: false},
-                        {type: 'Text', key:'Enough money', checked: false},
-                        {type: 'Picture', key:'Image of atm before check', checked: false}
-                    ]}
+                    data={this.state.data}
                     renderItem={this.renderItems}
                 />
             </View>
         )
     }
 }
+
+export default withNavigation(TasksScreen);
 
 const styles = StyleSheet.create({
     container: {

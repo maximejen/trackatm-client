@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { StyleSheet, View , ImageBackground, AsyncStorage} from 'react-native';
+import { StyleSheet, View , ImageBackground, AsyncStorage, Keyboard} from 'react-native';
 import { Button, Input } from 'react-native-elements';
 import config from '../constants/Config'
 
@@ -19,6 +19,7 @@ export default class LoginScreen extends React.Component {
 
     login() {
         const {navigate} = this.props.navigation;
+        Keyboard.dismiss();
         this.setState({loading: true});
         fetch(config.server_addr + '/api/login', {
             method: 'POST',
@@ -40,8 +41,9 @@ export default class LoginScreen extends React.Component {
                     }).catch((error) => {
                         console.log('Promise is rejected with error: ' + error);
                     });
+                } else {
+                    this.setState({loading: false, error: "Bad credentials"})
                 }
-                this.setState({loading: false, error: "Bad credentials"})
             })
             .catch((error) => {
                 console.error(error);
