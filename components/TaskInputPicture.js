@@ -60,6 +60,10 @@ class TaskInputPicture extends React.Component {
         }
     }
 
+    SetPicture = (data) => {
+        console.log(data)
+    };
+
     renderChecked() {
         if (this.state.checked) {
             return (<Icon
@@ -153,7 +157,9 @@ class TaskInputPicture extends React.Component {
                     >
                         <TouchableOpacity
                             style={{paddingRight: "2%"}}
-                            onPress={() => navigate("TaskCamera")}
+                            onPress={() => navigate("TaskCamera", {
+                                setPicture: this.SetPicture
+                            })}
                         >
                             <Icon
                                 name='camera'

@@ -35,6 +35,7 @@ export default class TaskCamera extends React.Component {
             await this.camera.takePictureAsync(options).then(photo => {
                 photo.exif.Orientation = 1;
                 console.log(photo);
+                this.props.navigation.state.params.setPicture(photo);
             });
         }
     }

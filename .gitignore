@@ -9,3 +9,5 @@ npm-debug.*
 *.xml
 
 package-lock\.json
+
+constants/Config\.js

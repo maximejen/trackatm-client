@@ -13,7 +13,8 @@ export default class TaskInputText extends React.Component {
         super(props);
         this.state = {
             checked: this.props.checked,
-            edit: false
+            edit: false,
+            text: ""
         }
     }
 
@@ -39,6 +40,7 @@ export default class TaskInputText extends React.Component {
     }
 
     textChanged(text) {
+        this.setState({text: text});
         this.props.handleText(this.props.id, text)
     }
     renderTextEdit() {
@@ -51,6 +53,7 @@ export default class TaskInputText extends React.Component {
                         style={{height: 40}}
                         placeholder="Type here to write information!"
                         onChangeText={(text) => this.textChanged(text)}
+                        value={this.state.text}
                     />
                 </View>
             )
