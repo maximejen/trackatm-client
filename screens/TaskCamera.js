@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { Camera, Permissions } from 'expo';
 import {Icon} from "react-native-elements";
+import DropdownAlert from 'react-native-dropdownalert';
 
 
 export default class TaskCamera extends React.Component {
@@ -34,7 +35,8 @@ export default class TaskCamera extends React.Component {
                 exif: true};
             await this.camera.takePictureAsync(options).then(photo => {
                 photo.exif.Orientation = 1;
-                console.log(photo);
+                this.dropdown.alertWithType('success', 'Picture has been saved', "");
+                //console.log(photo);
                 this.props.navigation.state.params.setPicture(photo);
             });
         }
@@ -50,6 +52,7 @@ export default class TaskCamera extends React.Component {
             return (
                 <View style={{ flex: 1 }}>
                     <Camera style={{ flex: 1 }} ref={ref => { this.camera = ref; }} type={this.state.type}>
+                        <DropdownAlert ref={ref => this.dropdown = ref} />
                         <View
                             style={{
                                 flex: 1,
@@ -65,8 +68,9 @@ export default class TaskCamera extends React.Component {
                                 }}
                                 onPress={this.snapPhoto.bind(this)}>
                                 <Icon
-                                    name='camera'
-                                    size={45}
+                                    name='adjust'
+                                    color="#ffffff"
+                                    size={60}
                                 />
 
                             </TouchableOpacity>

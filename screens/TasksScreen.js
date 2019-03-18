@@ -4,20 +4,58 @@ import {
     View,
     TouchableOpacity,
     Text,
-    FlatList
+    FlatList,
+    Alert
 } from 'react-native';
 import { Camera, Permissions } from 'expo';
-import { CheckBox } from 'react-native-elements'
+import {Button, CheckBox, Icon} from 'react-native-elements'
 
 import TaskInputText from '../components/TaskInputText'
 import TaskInputPicture from '../components/TaskInputPicture'
 import {withNavigation} from "react-navigation";
 
 class TasksScreen extends React.Component {
-    static navigationOptions = {
-        title: 'Tasks',
+    static navigationOptions = ({ navigation  }) => {
+        const {state} = navigation;
+        return {
+            title: 'Home',
+            headerLeft: (
+                <TouchableOpacity
+                    onPress={() => this.goBack(navigation)}
+                    style={{
+                        height: 45,
+                        width: 45,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        margin: 10,
+
+                    }}
+                >
+                    <Icon
+                        name='x'
+                        type='feather'
+                    />
+                </TouchableOpacity>
+            )
+        }
+
     };
-    async componentDidMount() {
+    static goBack(navigation) {
+        const {navigate} = navigation;
+
+        Alert.alert(
+            'Task validation',
+            'Do you want to validate these data ? You can\'t change data after validation',
+            [
+                {
+                    text: 'Cancel',
+                    onPress: () => console.log('Cancel Pressed'),
+                    style: 'cancel',
+                },
+                {text: 'Leave', onPress: () => navigate('Home')},
+            ],
+            {cancelable: false},
+        );
     }
 
     constructor(props) {
@@ -26,10 +64,14 @@ class TasksScreen extends React.Component {
         this.handleText = this.handleText.bind(this);
         this.state = ({job: this.props.navigation.state.params.job,
             data: [
-                    {id: 0,type: 'Text', key:'Good condition', checked: false, text: ""},
-        {id: 1, type: 'Text', key:'Enough money But i dont care', checked: true, text: ""},
-        {id: 2,type: 'Picture', key:'Image of atm before check', checked: false, text: ""}
-    ]
+                {type: 'Text', key:'Good condition', checked: false, text: ""},
+                {type: 'Text', key:'Enough money But i dont care', checked: true, text: ""},
+                {type: 'Picture', key:'Image of atm before check', checked: false, text: ""},
+                {type: 'Picture', key:'Image of atm after check', checked: false, text: ""},
+                {type: 'Picture', key:'Image of atm after checks', checked: false, text: ""},
+                {type: 'Picture', key:'Image of atm after checkss', checked: false, text: ""},
+                {type: 'Picture', key:'Image of atm after checksss', checked: false, text: ""}
+            ]
         });
     }
 
@@ -49,12 +91,12 @@ class TasksScreen extends React.Component {
         });
     }
 
-    renderText(item) {
+    renderText(item, index) {
 
         return (<TaskInputText
             title={item.key}
             checked={item.checked}
-            id={item.id}
+            id={index}
             item={item}
             handleChecked = {this.handleChecked}
             handleText = {this.handleText}
@@ -63,13 +105,13 @@ class TasksScreen extends React.Component {
         />)
     }
 
-    renderPicture(item) {
+    renderPicture(item, index) {
         return (
             <View>
                 <TaskInputPicture
                     title={item.key}
                     checked={item.checked}
-                    id={item.id}
+                    id={index}
                     item={item}
                     handleChecked = {this.handleChecked}
                     handleText = {this.handleText}
@@ -81,21 +123,51 @@ class TasksScreen extends React.Component {
     }
 
 
-    renderItems = ({ item }) =>
+    renderItems( item, index)
     {
         if (item.type === 'Text')
-            return this.renderText(item);
-        else return this.renderPicture(item)
+            return this.renderText(item, index);
+        else return this.renderPicture(item, index)
     };
+
+    sendTasksToServer() {
+        const {navigate} = this.props.navigation;
+        navigate("Home")
+    }
+
+    taskValiddation() {
+        const {navigate} = this.props.navigation;
+
+        Alert.alert(
+            'Task validation',
+            'Do you want to validate these data ? You can\'t change data after validation',
+            [
+                {
+                    text: 'Cancel',
+                    onPress: () => console.log('Cancel Pressed'),
+                    style: 'cancel',
+                },
+                {text: 'OK', onPress: () => this.sendTasksToServer()},
+            ],
+            {cancelable: false},
+        );
+    }
 
 
     render () {
         return (
             <View style={styles.container}>
                 <FlatList
+                    style={{flex: 1}}
                     data={this.state.data}
-                    renderItem={this.renderItems}
+                    renderItem={({item, index}) => this.renderItems(item, index)}
                 />
+                <View style={styles.buttonOpenMap}>
+                    <Button
+                        title="Validate tasks"
+                        type="solid"
+                        onPress={() => this.taskValiddation()}
+                    /></View>
             </View>
         )
     }
@@ -104,6 +176,11 @@ class TasksScreen extends React.Component {
 export default withNavigation(TasksScreen);
 
 const styles = StyleSheet.create({
+    buttonOpenMap: {
+        marginLeft: '3%',
+        marginRight: '3%',
+        flex: 0.1
+    },
     container: {
         flex: 1,
         paddingTop: 22

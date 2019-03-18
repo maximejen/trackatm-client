@@ -6,10 +6,10 @@ import {
     TextInput,
     Image,
     ScrollView,
-    FlatList
+    FlatList, StyleSheet
 } from 'react-native';
 import { material } from 'react-native-typography'
-import {CheckBox, Icon} from 'react-native-elements'
+import {Button, CheckBox, Icon} from 'react-native-elements'
 import ImageView from 'react-native-image-view';
 import TaskCamera from "../screens/TaskCamera";
 import {withNavigation} from "react-navigation";
@@ -24,44 +24,24 @@ class TaskInputPicture extends React.Component {
             cameraEnable: false,
             imageId: 0,
             images: [
-                {
-                    source: {
-                        uri: 'https://cdn.pixabay.com/photo/2017/08/17/10/47/paris-2650808_960_720.jpg',
-                    },
-                    title: 'Paris',
-                    width: 806,
-                    height: 720,
-                },
-                {
-                    source: {
-                        uri: 'https://cdn.pixabay.com/photo/2017/08/17/10/47/paris-2650808_960_720.jpg',
-                    },
-                    title: 'Paris',
-                    width: 806,
-                    height: 720,
-                },
-                {
-                    source: {
-                        uri: 'https://cdn.pixabay.com/photo/2017/08/17/10/47/paris-2650808_960_720.jpg',
-                    },
-                    title: 'Paris',
-                    width: 806,
-                    height: 720,
-                },
-                {
-                    source: {
-                        uri: 'https://cdn.pixabay.com/photo/2017/08/17/10/47/paris-2650808_960_720.jpg',
-                    },
-                    title: 'Paris',
-                    width: 806,
-                    height: 720,
-                },
             ]
         }
     }
 
     SetPicture = (data) => {
-        console.log(data)
+
+        var picture = {
+            source: {
+                uri: data.uri,
+            },
+            title: 'Paris',
+            width: 806,
+            height: 720,
+        };
+        var images = this.state.images;
+        images.push(picture);
+        this.setState({images: images});
+        console.log("Saving picture");
     };
 
     renderChecked() {
@@ -85,16 +65,16 @@ class TaskInputPicture extends React.Component {
         this.props.handleChecked(this.props.id)
     }
 
-    toogleViewer(){
+    toogleViewer(index){
         console.log("true");
-        this.setState({viewer: true})
+        this.setState({viewer: true, imageId: index})
     }
 
-    renderImage = ({item}) =>
+    renderImage(item, index)
     {
         return (
             <TouchableOpacity style={{paddingRight: 10}}
-                              onPress={() => this.toogleViewer()}
+                              onPress={() => this.toogleViewer(index)}
             >
                 <Image source={{uri: item.source.uri}}
                        style={{width: 100, height: 95, borderRadius: 4}} />
@@ -102,7 +82,8 @@ class TaskInputPicture extends React.Component {
         )
     }
 
-    renderTextEdit() {
+    renderImageFlatList() {
+        if (this.state.images.length > 0) {
             return (
                 <FlatList
                     style={{
@@ -112,9 +93,25 @@ class TaskInputPicture extends React.Component {
                     horizontal={true}
                     keyExtractor={(item, index) => index.toString()}
                     data={this.state.images}
-                    renderItem={this.renderImage}
+                    renderItem={({item, index}) => this.renderImage(item, index)}
                 />
             )
+        } else {
+            const {navigate} = this.props.navigation;
+            return (
+                <TouchableOpacity
+                    onPress={() => navigate("TaskCamera", {
+                        setPicture: this.SetPicture
+                    })}
+                >
+                    <Icon
+                        name="camera"
+                        type="feather"
+                        size={70}
+                    />
+                </TouchableOpacity>
+            )
+        }
 
     }
 
@@ -132,9 +129,9 @@ class TaskInputPicture extends React.Component {
             >
                 <ImageView
                     images={this.state.images}
-                    imageIndex={0}
+                    imageIndex={this.state.imageId}
                     isVisible={this.state.viewer}
-                    renderFooter={(currentImage) => (<View><Text>My footer</Text></View>)}
+                    onClose={() => this.setState({viewer: false})}
                 />
                 <View
                     style={{
@@ -148,7 +145,7 @@ class TaskInputPicture extends React.Component {
                     <View
                         style={{backgroundColor: '#f5f5f5',
                             paddingLeft: '5%',
-                            height: 35,
+                            height: 45,
                             flex: 1,
                             justifyContent: "space-between",
                             alignItems: "center",
@@ -167,14 +164,15 @@ class TaskInputPicture extends React.Component {
                             />
                         </TouchableOpacity>
                         <Text style={material.subheading}>{this.props.title}</Text>
-                        <TouchableOpacity style={{paddingLeft: "4%"}}
+                        <TouchableOpacity style={{paddingRight: "4%"}}
                                           onPress={() => this.ChangeParentState()}
 
                         >
                             {this.renderChecked()}
                         </TouchableOpacity>
                     </View>
-                    {this.renderTextEdit()}
+                    {this.renderImageFlatList()}
+
                 </View>
             </View>
         );

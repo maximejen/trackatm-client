@@ -58,14 +58,11 @@ export default class JobInformations extends React.Component {
 
 
     _handleOpenWithLinking = () => {
-
         if (Platform.OS === 'ios') {
-            Linking.openURL('comgooglemaps://?q='+ this.state.job.lat + ',' + this.state.job.long);
+            Linking.openURL('maps://?q='+ this.state.job.lat + ',' + this.state.job.long);
         } else {
             Linking.openURL('geo:' + + this.state.job.lat + ',' + this.state.job.long);
         }
-        //Linking.openURL('https://maps.google.com/?q=' + this.state.job.lat + ',' + this.state.job.long);
-        //Linking.openURL('comgooglemaps://?q='+ this.state.job.lat + ',' + this.state.job.long);
     };
 
     renderButtonTasks() {
@@ -126,7 +123,7 @@ export default class JobInformations extends React.Component {
                 <View style={{ flex: 1, position: 'relative'}}>
                     <View style={styles.buttonOpenMap}>
                         <Button
-                            title="open with google maps"
+                            title="Open with maps"
                             type="solid"
                             onPress={this._handleOpenWithLinking}
                         />

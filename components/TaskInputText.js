@@ -84,7 +84,7 @@ export default class TaskInputText extends React.Component {
                     <View
                         style={{backgroundColor: '#f5f5f5',
                             paddingLeft: '5%',
-                            height: 35,
+                            height: 45,
                             flex: 1,
                             justifyContent: "space-between",
                             alignItems: "center",
@@ -101,7 +101,7 @@ export default class TaskInputText extends React.Component {
                             />
                         </TouchableOpacity>
                         <Text style={material.subheading}>{this.props.title}</Text>
-                        <TouchableOpacity style={{paddingLeft: "4%"}}
+                        <TouchableOpacity style={{paddingRight: "4%"}}
                                           onPress={() => this.ChangeParentState()}
 
                         >

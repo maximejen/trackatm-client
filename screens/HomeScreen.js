@@ -9,18 +9,53 @@ import {
     View,
     FlatList,
     SectionList,
-    RefreshControl
+    RefreshControl, AsyncStorage
 } from 'react-native';
 import { withNavigation } from "react-navigation"
 import TouchableScale from 'react-native-touchable-scale'; // https://github.com/kohver/react-native-touchable-scale
 import { LinearGradient } from 'expo';
-import { ListItem } from 'react-native-elements'
+import { ListItem, Icon } from 'react-native-elements'
 
 class HomeScreen extends React.Component {
-    static navigationOptions = {
-        title: 'Home',
-        headerLeft: null
+    static navigationOptions = ({ navigation  }) => {
+
+        const {state} = navigation;
+        return {
+            title: 'Home',
+            headerLeft: null,
+            headerRight: (
+                <TouchableOpacity
+                    onPress={() => this.logout(navigation)}
+                    style={{
+                        height: 45,
+                        width: 45,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        margin: 10,
+
+                    }}
+                >
+                    <Icon
+                        name='log-out'
+                        type='feather'
+                    />
+                </TouchableOpacity>
+            )
+        }
+
     };
+    componentWillMount() {
+        const {setParams} = this.props.navigation;
+        setParams({demotxt: "looool"});
+
+    }
+
+
+    static logout(navigation) {
+        this.removeToken().then((value) => {
+            navigation.navigate("Login")
+        })
+    }
 
     constructor(props) {
         super(props);
@@ -29,6 +64,15 @@ class HomeScreen extends React.Component {
         this.state = {
             refreshing: false,
         };
+    }
+
+    static async removeToken() {
+        try {
+            await AsyncStorage.removeItem("token");
+            return true
+        } catch (error) {
+            console.log(error.message);
+        }
     }
 
     updateTitle(title) {

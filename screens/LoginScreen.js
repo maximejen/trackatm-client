@@ -37,6 +37,7 @@ export default class LoginScreen extends React.Component {
                 if (responseJson.success) {
                     this.storeItem(responseJson.token).then((value) => {
                         console.log("Token save: " + value);
+                        this.setState({loading: false});
                         navigate('Home');
                     }).catch((error) => {
                         console.log('Promise is rejected with error: ' + error);
@@ -88,12 +89,12 @@ export default class LoginScreen extends React.Component {
                                 errorMessage={this.state.error}
                             />
                             <Button
+                                loading={this.state.loading}
                                 disabled={this.state.loading}
                                 buttonStyle={{backgroundColor: '#00d1b2', borderRadius: 10, marginTop: "3%"}}
                                 textStyle={{textAlign: 'center'}}
                                 title={`Login`}
                                 onPress={() => this.login()}
-                                //onPress={() => navigate('Home')}
                             />
                         </View>
                     </View>
