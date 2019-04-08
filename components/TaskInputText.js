@@ -76,7 +76,7 @@ export default class TaskInputText extends React.Component {
                     style={{
                         borderStyle: "solid",
                         borderWidth: "1px",
-                        borderRadius: "3px",
+                        borderRadius: "15%",
                         borderColor: "#d6d6d6",
                     }}
                 >
@@ -86,6 +86,7 @@ export default class TaskInputText extends React.Component {
                             paddingLeft: '5%',
                             height: 45,
                             flex: 1,
+                            borderRadius: "15%",
                             justifyContent: "space-between",
                             alignItems: "center",
                             flexDirection: "row",

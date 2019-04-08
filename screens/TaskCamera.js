@@ -8,15 +8,17 @@ import {
 import { Camera, Permissions } from 'expo';
 import {Icon} from "react-native-elements";
 import DropdownAlert from 'react-native-dropdownalert';
+import {withNavigation} from "react-navigation";
 
 
-export default class TaskCamera extends React.Component {
+class TaskCamera extends React.Component {
     static navigationOptions = {
-        title: 'Tasks',
+        header: null
     };
     state = {
         hasCameraPermission: null,
         type: Camera.Constants.Type.back,
+        takenPicture: true,
     };
     async componentDidMount() {
         const { status } = await Permissions.askAsync(Permissions.CAMERA);
@@ -28,6 +30,7 @@ export default class TaskCamera extends React.Component {
     }
 
     async snapPhoto() {
+        this.dropdown.alertWithType('success', 'Picture has been saved', "");
         console.log('Button Pressed');
         if (this.camera) {
             console.log('Taking photo');
@@ -35,7 +38,6 @@ export default class TaskCamera extends React.Component {
                 exif: true};
             await this.camera.takePictureAsync(options).then(photo => {
                 photo.exif.Orientation = 1;
-                this.dropdown.alertWithType('success', 'Picture has been saved', "");
                 //console.log(photo);
                 this.props.navigation.state.params.setPicture(photo);
             });
@@ -59,21 +61,41 @@ export default class TaskCamera extends React.Component {
                                 backgroundColor: 'transparent',
                                 flexDirection: 'row',
                             }}>
-                            <TouchableOpacity
+
+                            <View
                                 style={{
                                     flex: 1,
-                                    alignSelf: 'flex-end',
-                                    alignItems: 'center',
-                                    paddingBottom: "10%"
+                                    flexDirection: 'row',
+                                    justifyContent: 'flex-start',
+                                    alignItems:'flex-end',
+                                    paddingBottom: "7%"
                                 }}
-                                onPress={this.snapPhoto.bind(this)}>
-                                <Icon
-                                    name='adjust'
-                                    color="#ffffff"
-                                    size={60}
-                                />
+                            >
+                                <TouchableOpacity
+                                style={{
+                                    flexGrow: 0.45
+                                }}
+                                onPress={() => this.props.navigation.goBack()}
+                                >
+                                    <Icon
+                                        style={{justifyContent: "flex-start"}}
+                                        name='close'
+                                        color="#ffffff"
+                                        size={40}
+                                    />
+                                </TouchableOpacity>
 
-                            </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={this.snapPhoto.bind(this)}>
+                                    <Icon
+                                        name='adjust'
+                                        color="#ffffff"
+                                        size={60}
+                                    />
+                                </TouchableOpacity>
+
+                            </View>
+
                         </View>
                         <TouchableOpacity style={{}} onPress={this.snapPhoto.bind(this)}>
 
@@ -85,3 +107,5 @@ export default class TaskCamera extends React.Component {
         }
     }
 }
+
+export default withNavigation(TaskCamera);

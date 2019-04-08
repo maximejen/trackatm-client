@@ -6,6 +6,7 @@ import {
     TextInput,
     Image,
     ScrollView,
+    ImageBackground,
     FlatList, StyleSheet
 } from 'react-native';
 import { material } from 'react-native-typography'
@@ -19,7 +20,8 @@ class TaskInputPicture extends React.Component {
         super(props);
         this.state = {
             checked: this.props.checked,
-            edit: true,
+            edit: false,
+            text: "",
             viewer: false,
             cameraEnable: false,
             imageId: 0,
@@ -29,8 +31,8 @@ class TaskInputPicture extends React.Component {
     }
 
     SetPicture = (data) => {
-
-        var picture = {
+        this.pictureChanged(data);
+        let picture = {
             source: {
                 uri: data.uri,
             },
@@ -38,7 +40,7 @@ class TaskInputPicture extends React.Component {
             width: 806,
             height: 720,
         };
-        var images = this.state.images;
+        let images = this.state.images;
         images.push(picture);
         this.setState({images: images});
         console.log("Saving picture");
@@ -60,6 +62,10 @@ class TaskInputPicture extends React.Component {
         }
     }
 
+    pictureChanged(data) {
+        this.props.handlePicture(this.props.id, data)
+    }
+
     ChangeParentState() {
         this.setState({checked: !this.state.checked});
         this.props.handleChecked(this.props.id)
@@ -70,15 +76,42 @@ class TaskInputPicture extends React.Component {
         this.setState({viewer: true, imageId: index})
     }
 
+    deleteImage(idx) {
+        let array = [...this.state.images]; // make a separate copy of the array
+        array.splice(idx, 1);
+        this.setState({images: array});
+        this.props.handleDeletePicture(this.props.id, idx);
+    }
+
     renderImage(item, index)
     {
         return (
-            <TouchableOpacity style={{paddingRight: 10}}
-                              onPress={() => this.toogleViewer(index)}
-            >
-                <Image source={{uri: item.source.uri}}
-                       style={{width: 100, height: 95, borderRadius: 4}} />
-            </TouchableOpacity>
+            <View style={{position: 'static'}}>
+                <TouchableOpacity style={{paddingRight: 10}}
+                                  onPress={() => this.toogleViewer(index)}
+                >
+                    <ImageBackground source={{uri: item.source.uri}}
+                                     style={{
+                                         width: 100, height: 95, borderRadius: 4}}
+
+                    >
+                        <TouchableOpacity
+                            onPress={() => this.deleteImage(index)}
+                            style={{
+                                position: 'absolute',
+                                bottom:0
+                            }}
+                        >
+                            <Icon
+                                name="clear"
+                                size={30}
+                                color='#ff0000'
+                            />
+                        </TouchableOpacity>
+
+                    </ImageBackground>
+                </TouchableOpacity>
+            </View>
         )
     }
 
@@ -115,6 +148,28 @@ class TaskInputPicture extends React.Component {
 
     }
 
+    textChanged(text) {
+        this.setState({text: text});
+        this.props.handleText(this.props.id, text)
+    }
+
+    renderTextEdit() {
+        if (this.state.edit) {
+            return (
+                <View
+                    style={{paddingLeft: "3%", backgroundColor: "#f3f3f3", borderBottomLeftRadius: "15%"}}
+                >
+                    <TextInput
+                        style={{height: 40}}
+                        placeholder="Type here to write information!"
+                        onChangeText={(text) => this.textChanged(text)}
+                        value={this.state.text}
+                    />
+                </View>
+            )
+
+        }
+    }
 
     render() {
         const {navigate} = this.props.navigation;
@@ -137,7 +192,7 @@ class TaskInputPicture extends React.Component {
                     style={{
                         borderStyle: "solid",
                         borderWidth: "1px",
-                        borderRadius: "3px",
+                        borderRadius: "15%",
                         borderColor: "#d6d6d6",
                     }}
                 >
@@ -150,8 +205,22 @@ class TaskInputPicture extends React.Component {
                             justifyContent: "space-between",
                             alignItems: "center",
                             flexDirection: "row",
+                            borderTopLeftRadius: "15%",
+                            borderTopRightRadius: "15%",
                         }}
                     >
+
+
+                        <TouchableOpacity
+                            style={{paddingRight: "2%"}}
+                            onPress={() => this.setState({edit: !this.state.edit})}
+                        >
+                            <Icon
+                                name='edit'
+                                type="feather"
+                            />
+                        </TouchableOpacity>
+                        <Text style={material.subheading}>{this.props.title}</Text>
                         <TouchableOpacity
                             style={{paddingRight: "2%"}}
                             onPress={() => navigate("TaskCamera", {
@@ -163,7 +232,6 @@ class TaskInputPicture extends React.Component {
                                 type="feather"
                             />
                         </TouchableOpacity>
-                        <Text style={material.subheading}>{this.props.title}</Text>
                         <TouchableOpacity style={{paddingRight: "4%"}}
                                           onPress={() => this.ChangeParentState()}
 
@@ -171,6 +239,8 @@ class TaskInputPicture extends React.Component {
                             {this.renderChecked()}
                         </TouchableOpacity>
                     </View>
+                    {this.renderTextEdit()}
+
                     {this.renderImageFlatList()}
 
                 </View>

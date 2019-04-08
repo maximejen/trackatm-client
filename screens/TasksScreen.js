@@ -62,30 +62,72 @@ class TasksScreen extends React.Component {
         super(props);
         this.handleChecked = this.handleChecked.bind(this);
         this.handleText = this.handleText.bind(this);
-        this.state = ({job: this.props.navigation.state.params.job,
+        this.handlePicture = this.handlePicture.bind(this);
+        this.handleDeletePicture = this.handleDeletePicture.bind(this);
+        this.state = ({
             data: [
-                {type: 'Text', key:'Good condition', checked: false, text: ""},
-                {type: 'Text', key:'Enough money But i dont care', checked: true, text: ""},
-                {type: 'Picture', key:'Image of atm before check', checked: false, text: ""},
-                {type: 'Picture', key:'Image of atm after check', checked: false, text: ""},
-                {type: 'Picture', key:'Image of atm after checks', checked: false, text: ""},
-                {type: 'Picture', key:'Image of atm after checkss', checked: false, text: ""},
-                {type: 'Picture', key:'Image of atm after checksss', checked: false, text: ""}
+                {type: 'Text', key:'Good condition', checked: false, content: null, text: ""},
+                {type: 'Text', key:'Enough money But i dont care', checked: true, content: null, text: ""},
+                {type: 'Picture', key:'Image of atm before check', checked: false, content: null, text: ""},
+                {type: 'Picture', key:'Image of atm after check', checked: false, content: null, text: ""},
+                {type: 'Picture', key:'Image of atm after checks', checked: false, content: null, text: ""},
+                {type: 'Picture', key:'Image of atm after checkss', checked: false, content: null, text: ""},
+                {type: 'Picture', key:'Image of atm after checksss', checked: false, content: null, text: ""}
             ]
         });
     }
 
+    createFormData = (photo, body) => {
+        const data = new FormData();
+
+        data.append("photo", {
+            name: photo.fileName,
+            type: photo.type,
+            uri:
+                Platform.OS === "android" ? photo.uri : photo.uri.replace("file://", "")
+        });
+
+        Object.keys(body).forEach(key => {
+            data.append(key, body[key]);
+        });
+
+        return data;
+    };
+
+    sendTasksToServer() {
+        const {navigate} = this.props.navigation;
+        navigate("Home")
+    }
+
     handleText(id, text){
-        var data = this.state.data;
+        let data = this.state.data;
         data[id].text = text;
         this.setState({
             data: data
         });
     }
 
+    handlePicture(id, picture){
+        let data = this.state.data;
+        if (!data[id].content)
+            data[id].content = [];
+        data[id].content.push(picture);
+        this.setState({
+            data: data
+        });
+    }
+
+    handleDeletePicture(id, idx){
+        let data = this.state.data;
+        data[id].content.splice(idx, 1);
+        this.setState({
+            data: data
+        });
+    }
+
     handleChecked(id) {
-        var data = this.state.data;
-        data[id].checked = !data[id].checked
+        let data = this.state.data;
+        data[id].checked = !data[id].checked;
         this.setState({
             data: data
         });
@@ -114,7 +156,9 @@ class TasksScreen extends React.Component {
                     id={index}
                     item={item}
                     handleChecked = {this.handleChecked}
+                    handlePicture = {this.handlePicture}
                     handleText = {this.handleText}
+                    handleDeletePicture = {this.handleDeletePicture}
                     iconRight
                     onPress={() => item.checked = !item.checked}
                 />
@@ -130,14 +174,9 @@ class TasksScreen extends React.Component {
         else return this.renderPicture(item, index)
     };
 
-    sendTasksToServer() {
-        const {navigate} = this.props.navigation;
-        navigate("Home")
-    }
+
 
     taskValiddation() {
-        const {navigate} = this.props.navigation;
-
         Alert.alert(
             'Task validation',
             'Do you want to validate these data ? You can\'t change data after validation',
@@ -183,7 +222,7 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        paddingTop: 22
+        paddingTop: "5%"
     },
     item: {
         padding: 10,
