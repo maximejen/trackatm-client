@@ -12,9 +12,20 @@ import TouchableScale from 'react-native-touchable-scale'; // https://github.com
 import { Location, Permissions } from 'expo';
 
 import { Icon } from 'react-native-elements'
-import { FlatGrid } from 'react-native-super-grid';
+import { FlatGrid, SuperGridSectionList } from 'react-native-super-grid';
 import {getDistance} from "react-native-image-view/src/utils";
 import geolib from 'geolib'
+import config from "../constants/Config";
+
+const DaysOfWeek = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday"
+];
 
 class HomeScreen extends React.Component {
     static navigationOptions = ({ navigation  }) => {
@@ -48,54 +59,41 @@ class HomeScreen extends React.Component {
     state = {
         refreshing: false,
         location: null,
-        sections: [
-            {
-                atm_name: 'ATM #9',
-                bank_name: 'BC',
-                lat: 48.576678,
-                long: 7.749236,
-                avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-                type: "today",
-                lastClean: "02-03-2018",
-                nextClean: "05-03-2018"
-
-            },
-            {
-                atm_name: 'ATM #10',
-                bank_name: 'ABC',
-                lat: 48.613675,
-                long: 7.752227,
-                avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-                type: "today",
-                lastClean: "03-03-2018",
-                nextClean: "10-03-2018"
-
-            },
-            {
-                atm_name: 'ATM #10',
-                bank_name: 'ABC',
-                lat: 48.576678,
-                long: 7.749236,
-                avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-                type: "important",
-                lastClean: "03-03-2018",
-                nextClean: "07-03-2018"
-
-            },
-        ]
+        sections: null
     };
 
     constructor(props) {
         super(props);
         this.navigate  = props.navigation;
         this.updateTitle("3 tasks remaining");
-    }
 
+        this.updateOperations();
+    }
+    updateOperations = async () =>{
+        let id = 1;
+        const userToken = await AsyncStorage.getItem('token');
+
+        fetch(config.server_addr + '/api/cleaner/' + id, {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'token': userToken
+            },
+        }).then((response) => response.json())
+            .then((responseJson) => {
+                //console.log(responseJson)
+                this.setState({sections: [...responseJson.operations]})
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+    }
 
     componentWillMount() {
         const {setParams} = this.props.navigation;
         setParams({demotxt: "looool"});
-        this.setColor()
+        //this.setColor()
         if (Platform.OS === 'android' && !Constants.isDevice) {
             this.setState({
                 errorMessage: 'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
@@ -144,14 +142,15 @@ class HomeScreen extends React.Component {
 
     _onRefresh = () => {
         this.setState({refreshing: true});
+        this.updateOperations();
         this.setState({refreshing: false});
     };
 
-    getDistance(lat1, lon1) {
-        if (!this.state.location)
+    getDistance(coords) {
+        if (!this.state.location || !coords)
             return;
         return geolib.convertUnit('km', geolib.getDistance(
-            {latitude: lat1, longitude: lon1},
+            {latitude: coords[0], longitude: coords[0]},
             {latitude: this.state.location.coords.latitude, longitude: this.state.location.coords.longitude}
         ));
     }
@@ -171,35 +170,70 @@ class HomeScreen extends React.Component {
         this.setState({sections: newData});
     }
 
-    render () {
+    renderList() {
+        let sortedArray = [];
+        for (let i = 0; i < DaysOfWeek.length; i++) {
+            let toShow = this.state.sections.filter((item) => {
+                if (item.day === DaysOfWeek[i])
+                    return item;
+            });
+            if (toShow.length > 0) {
+                let item = {
+                    title: DaysOfWeek[i],
+                    data: toShow
+                };
+                sortedArray.push(item);
+            }
+            //console.log("Day :" + DaysOfWeek[i] + "Values : " + toShow);
+        }
+        console.log(sortedArray);
         const {navigate} = this.props.navigation;
 
         return (
-            <View style={styles.container}>
-                <FlatGrid
-                    itemDimension={130}
-                    items={this.state.sections}
-                    style={styles.gridView}
+                <SuperGridSectionList
+                    itemDimension={90}
+                    // staticDimension={300}
+                    // fixed
+                    // spacing={20}
+                    sections={sortedArray}
                     refreshControl={
                         <RefreshControl
                             refreshing={this.state.refreshing}
                             onRefresh={this._onRefresh}
                         />}
-                    // staticDimension={300}
-                    // fixed
-                     spacing={30}
-                    renderItem={({ item, index }) => (
+                    style={styles.gridView}
+                    renderItem={({ item, section, index }) => (
                         <TouchableOpacity
                             onPress={() => navigate('JobInformation', {job: item, name: 'dams'})}
-                            style={[styles.itemContainer, { backgroundColor: item.color}]}>
-                            <Text style={styles.itemName}>{item.atm_name}</Text>
-                            <Text style={styles.itemCode}>{item.bank_name}</Text>
-                            <Text style={styles.itemCode}>{this.getDistance(item.lat, item.long)} km</Text>
+                            style={[styles.itemContainer, { backgroundColor: '#005dff'}]}>
+                            <Text style={styles.itemName}>{item.place.name}</Text>
+                            <Text style={styles.itemCode}>{item.place.description}</Text>
+                            <Text style={styles.itemCode}>{this.getDistance(item.place.geoCoors)} km</Text>
                         </TouchableOpacity>
                     )}
+                    renderSectionHeader={({ section }) => (
+                        <Text style={styles.sectionHeader}>{section.title}</Text>
+                    )}
                 />
+            )
+    }
+
+    render () {
+        const {navigate} = this.props.navigation;
+        if (this.state.sections) {
+
+        return (
+            <View style={styles.container}>
+                {this.renderList()}
             </View>
         )
+        }
+        else {
+            return (
+                <View/>
+            )
+        }
+
     }
 }
 

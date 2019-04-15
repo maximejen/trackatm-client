@@ -1,14 +1,10 @@
 import React from 'react';
 import {
-    Image,
     Platform,
     ScrollView,
     StyleSheet,
     Text,
-    TouchableOpacity,
     View,
-    FlatList,
-    SectionList,
     Linking
 } from 'react-native';
 import { MapView, Location, Permissions } from 'expo';
@@ -24,7 +20,7 @@ export default class JobInformations extends React.Component {
         this.state = ({
             job: this.props.navigation.state.params.job,
         });
-        this.updateTitle(this.state.job.atm_name + ' - ' + this.state.job.bank_name);
+        this.updateTitle(this.state.job.place.name);
     }
 
     componentWillMount() {
@@ -73,20 +69,18 @@ export default class JobInformations extends React.Component {
                     <Button
                         title="Complete tasks"
                         type="solid"
-                        onPress={() => navigate('Tasks', {job: this.state.job})}
+                        onPress={() => navigate('Tasks', {job: this.state.job.template.tasks})}
                     /></View>)
         }
     }
 
     renderAdress() {
-        if (this.state.location) {
-            return (
-                <View>
-                    <Text style={styles.textTitle}>location address</Text>
-                    <Text style={styles.textData}>{this.state.location.name} {this.state.location.postalCode} {this.state.location.city}</Text>
-                </View>
-            )
-        }
+        return (
+            <View>
+                <Text style={styles.textTitle}>location address</Text>
+                <Text style={styles.textData}>{this.state.job.place.address}</Text>
+            </View>
+        )
     }
 
     renderBorderLine() {
@@ -107,15 +101,15 @@ export default class JobInformations extends React.Component {
             <ScrollView style={{ flex: 1}}>
                 <MapView style={styles.map}
                          initialRegion={{
-                             latitude: this.state.job.lat,
-                             longitude: this.state.job.long,
+                             latitude: this.state.job.place.geoCoords.lat,
+                             longitude: this.state.job.place.geoCoords.lon,
                              latitudeDelta: 0.005,
                              longitudeDelta: 0.005   ,
                          }}
                 >
                     <MapView.Marker
-                        coordinate={{latitude: this.state.job.lat,
-                            longitude: this.state.job.long}}
+                        coordinate={{latitude: this.state.job.place.geoCoords.lat,
+                            longitude: this.state.job.place.geoCoords.lon}}
                         title={this.state.job.bank_name}
                         description={this.state.job.atm_name}
                     />

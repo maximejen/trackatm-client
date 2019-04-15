@@ -10,7 +10,7 @@ import {
     FlatList, StyleSheet
 } from 'react-native';
 import { material } from 'react-native-typography'
-import {Button, CheckBox, Icon} from 'react-native-elements'
+import {Tooltip, Icon} from 'react-native-elements'
 import ImageView from 'react-native-image-view';
 import TaskCamera from "../screens/TaskCamera";
 import {withNavigation} from "react-navigation";
@@ -220,7 +220,9 @@ class TaskInputPicture extends React.Component {
                                 type="feather"
                             />
                         </TouchableOpacity>
-                        <Text style={material.subheading}>{this.props.title}</Text>
+                        <Tooltip popover={<Text>{this.props.comment}</Text>}>
+                            <Text style={material.subheading}>{this.props.title}</Text>
+                        </Tooltip>
                         <TouchableOpacity
                             style={{paddingRight: "2%"}}
                             onPress={() => navigate("TaskCamera", {

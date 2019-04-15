@@ -5,14 +5,14 @@ import {
     TouchableOpacity,
     Text,
     FlatList,
-    Alert
+    Alert,
+    Platform
 } from 'react-native';
-import { Camera, Permissions } from 'expo';
-import {Button, CheckBox, Icon} from 'react-native-elements'
-
+import {Button, Tooltip, Icon} from 'react-native-elements'
 import TaskInputText from '../components/TaskInputText'
 import TaskInputPicture from '../components/TaskInputPicture'
 import {withNavigation} from "react-navigation";
+import {requestOperationDone} from '../utils/TasksRequests'
 
 class TasksScreen extends React.Component {
     static navigationOptions = ({ navigation  }) => {
@@ -58,45 +58,75 @@ class TasksScreen extends React.Component {
         );
     }
 
+    state = {
+        data: null,
+        beginningDate: Date.now()
+    };
+
     constructor(props) {
         super(props);
         this.handleChecked = this.handleChecked.bind(this);
         this.handleText = this.handleText.bind(this);
         this.handlePicture = this.handlePicture.bind(this);
         this.handleDeletePicture = this.handleDeletePicture.bind(this);
-        this.state = ({
-            data: [
-                {type: 'Text', key:'Good condition', checked: false, content: null, text: ""},
-                {type: 'Text', key:'Enough money But i dont care', checked: true, content: null, text: ""},
-                {type: 'Picture', key:'Image of atm before check', checked: false, content: null, text: ""},
-                {type: 'Picture', key:'Image of atm after check', checked: false, content: null, text: ""},
-                {type: 'Picture', key:'Image of atm after checks', checked: false, content: null, text: ""},
-                {type: 'Picture', key:'Image of atm after checkss', checked: false, content: null, text: ""},
-                {type: 'Picture', key:'Image of atm after checksss', checked: false, content: null, text: ""}
-            ]
-        });
+        this.createTasks(this.props.navigation.state.params.job);
     }
 
-    createFormData = (photo, body) => {
-        const data = new FormData();
+    createTasks(task) {
+        let newTask = [];
+        for (let i = 0; i < task.length; i++) {
+            let item = {
+                imageForced: task[i].imagesForced,
+                key: task[i].name,
+                comment: task[i].comment,
+                checked: false,
+                content: null,
+                text: ""
+            };
+            newTask.push(item);
+        }
+        console.log(newTask);
+        this.state = {
+            data: newTask
+        };
+    };
 
-        data.append("photo", {
-            name: photo.fileName,
-            type: photo.type,
-            uri:
-                Platform.OS === "android" ? photo.uri : photo.uri.replace("file://", "")
-        });
+    createFormData = (item, itemidx) => {
+        const formData = new FormData();
 
-        Object.keys(body).forEach(key => {
-            data.append(key, body[key]);
-        });
+        console.log(item);
+        if (item.content) {
+            item.content.forEach((elem, idx) => {
+                formData.append("photo", {
+                    name: itemidx + '-' + idx,
+                    type: elem.type,
+                    uri:
+                        Platform.OS === "android" ? elem.uri : elem.uri.replace("file://", "")
+                });
+            });
+        }
 
-        return data;
+
+        formData.append("checked", item.checked);
+        formData.append("comment", item.comment);
+        formData.append("imagesForced", item.imageForced);
+        formData.append("textInput", item.text);
+        console.log(formData);
+        return formData;
     };
 
     sendTasksToServer() {
         const {navigate} = this.props.navigation;
-        navigate("Home")
+        requestOperationDone(this.state.beginningDate, this.state.data).done((historyId) => {
+
+            //console.log('historyid :' + historyId);
+              //  this.state.data.forEach((elem, idx) => {
+                //    let data = this.createFormData(elem, idx);
+                  //  console.log(data);
+               // });
+                navigate("Home")
+        }
+    )
     }
 
     handleText(id, text){
@@ -138,6 +168,7 @@ class TasksScreen extends React.Component {
         return (<TaskInputText
             title={item.key}
             checked={item.checked}
+            comment={item.comment}
             id={index}
             item={item}
             handleChecked = {this.handleChecked}
@@ -153,6 +184,7 @@ class TasksScreen extends React.Component {
                 <TaskInputPicture
                     title={item.key}
                     checked={item.checked}
+                    comment={item.comment}
                     id={index}
                     item={item}
                     handleChecked = {this.handleChecked}
@@ -169,7 +201,7 @@ class TasksScreen extends React.Component {
 
     renderItems( item, index)
     {
-        if (item.type === 'Text')
+        if (!item.imageForced)
             return this.renderText(item, index);
         else return this.renderPicture(item, index)
     };
@@ -194,6 +226,11 @@ class TasksScreen extends React.Component {
 
 
     render () {
+        if (!this.state.data) {
+            return (
+                <View/>
+            )
+        }
         return (
             <View style={styles.container}>
                 <FlatList
