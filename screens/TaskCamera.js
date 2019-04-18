@@ -34,7 +34,7 @@ class TaskCamera extends React.Component {
         console.log('Button Pressed');
         if (this.camera) {
             console.log('Taking photo');
-            const options = { quality: 1, base64: true, fixOrientation: true,
+            const options = { quality: 0, base64: false, fixOrientation: true,
                 exif: true};
             await this.camera.takePictureAsync(options).then(photo => {
                 photo.exif.Orientation = 1;

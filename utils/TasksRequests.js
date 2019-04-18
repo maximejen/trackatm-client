@@ -1,5 +1,6 @@
 import config from "../constants/Config";
 import {AsyncStorage, Platform} from "react-native";
+import { ImageManipulator } from 'expo';
 
 export const requestOperationDone = async (beginningDate, data) =>{
     //send: operation id et operationTemplate id, date debut, date fin,
@@ -30,32 +31,48 @@ export const requestOperationDone = async (beginningDate, data) =>{
 
 const sendTasks = (data, historyId) => {
     data.forEach((elem, idx) => {
-        let data = createFormData(elem, idx);
+        let data = createFormData(elem, idx, historyId);
         console.log(data);
     });
 };
 
-const createFormData = (item, itemidx) => {
+const createFormData = async (item, itemidx, historyId) => {
     const formData = new FormData();
-
+    historyId = 16;
     console.log(item);
     if (item.content) {
         item.content.forEach((elem, idx) => {
+
             formData.append("photo", {
-                name: itemidx + '-' + idx,
+                name: itemidx + '-' + idx + '-' +Date.now() + '.png',
                 type: elem.type,
                 uri:
-                    Platform.OS === "android" ? elem.uri : elem.uri.replace("file://", "")
+                    Platform.OS === "android" ? elem.uri : elem.localUri
             });
         });
     }
-
-
-    formData.append("checked", item.checked);
+    console.log(item.text);
+    formData.append("checked", item.checked | 0);
     formData.append("comment", item.comment);
-    formData.append("imagesForced", item.imageForced);
+    formData.append("imagesForced", item.imageForced | 0);
     formData.append("textInput", item.text);
     formData.append("name", item.key);
     console.log(formData);
+    const userToken = await AsyncStorage.getItem('token');
+
+    fetch(config.server_addr + '/api/operation/task/' + historyId,{
+        method: 'POST',
+        headers: {
+            'token': userToken
+        },
+        body: formData
+    }).then((response) => response.json())
+        .then((responseJson) => {
+            console.log("task : " + responseJson);
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+
     return formData;
 };
