@@ -35,8 +35,7 @@ export default class LoginScreen extends React.Component {
             .then((responseJson) => {
                 console.log(responseJson);
                 if (responseJson.success) {
-                    this.storeItem(responseJson.token).then((value) => {
-                        console.log("Token save: " + value);
+                    this.storeItem(responseJson.token, JSON.stringify(responseJson.cleanerid)).then((value) => {
                         this.setState({loading: false});
                         navigate('Home');
                     }).catch((error) => {
@@ -52,10 +51,11 @@ export default class LoginScreen extends React.Component {
             });
     }
 
-    async storeItem(item) {
+    async storeItem(token, cleanerId) {
         try {
-            var jsonOfItem = await AsyncStorage.setItem("token", item);
-            return jsonOfItem;
+            await AsyncStorage.setItem("token", token);
+            await AsyncStorage.setItem("cleanerid", cleanerId);
+
         } catch (error) {
             console.log(error.message);
         }

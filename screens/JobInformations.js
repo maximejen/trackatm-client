@@ -7,8 +7,8 @@ import {
     View,
     Linking
 } from 'react-native';
-import { MapView, Location, Permissions } from 'expo';
-import { Button } from 'react-native-elements';
+import {MapView, Location, Permissions} from 'expo';
+import {Button} from 'react-native-elements';
 
 export default class JobInformations extends React.Component {
     static navigationOptions = {
@@ -17,29 +17,29 @@ export default class JobInformations extends React.Component {
 
     constructor(props) {
         super(props);
+        console.log(this.props.navigation.state.params.job);
         this.state = ({
             job: this.props.navigation.state.params.job,
         });
         this.updateTitle(this.state.job.place.name);
+        this._getLocationAsync(this.state.job.place.geoCoords);
     }
 
-    componentWillMount() {
-        this._getLocationAsync();
-
-    }
-    _getLocationAsync = async () => {
-        let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    _getLocationAsync = async (coords) => {
+        let {status} = await Permissions.askAsync(Permissions.LOCATION);
         if (status !== 'granted') {
             this.setState({
                 errorMessage: 'Permission to access location was denied',
             });
         }
-        let positions = {
-            latitude: this.state.job.lat,
-            longitude: this.state.job.long
-        };
-        let location = await Location.reverseGeocodeAsync(positions);
-        this.setState({ location: location[0]});
+        let locationDetail = await Location.reverseGeocodeAsync({
+            latitude: coords.lat,
+            longitude: coords.lon
+        });
+        console.log(locationDetail);
+        this.setState({
+            location: locationDetail[0]
+        });
     };
 
 
@@ -55,66 +55,75 @@ export default class JobInformations extends React.Component {
 
     _handleOpenWithLinking = () => {
         if (Platform.OS === 'ios') {
-            Linking.openURL('maps://?q='+ this.state.job.lat + ',' + this.state.job.long);
+            Linking.openURL('maps://?q=' + this.state.job.lat + ',' + this.state.job.long);
         } else {
-            Linking.openURL('geo:' + + this.state.job.lat + ',' + this.state.job.long);
+            Linking.openURL('geo:' + +this.state.job.lat + ',' + this.state.job.long);
         }
     };
 
     renderButtonTasks() {
         const {navigate} = this.props.navigation;
-        if (this.state.job.type !== 'done') {
-            return (
-                <View style={styles.buttonOpenMap}>
-                    <Button
-                        title="Complete tasks"
-                        type="solid"
-                        onPress={() => navigate('Tasks', {job: this.state.job.template.tasks})}
-                    /></View>)
-        }
+        return (
+            <View style={styles.buttonOpenMap}>
+                <Button
+                    title="Complete tasks"
+                    type="solid"
+                    onPress={() => navigate('Tasks', {tasks: this.state.job.template.tasks, job: this.state.job})}
+                /></View>
+        )
     }
 
-    renderAdress() {
-        return (
+    renderAddress() {
+        if (this.state.location) {
+            return (
+                <View>
+                    <Text style={styles.textTitle}>location address</Text>
+                    <Text style={styles.textData}>{this.state.location.street},{this.state.location.city}, {this.state.location.postalCode}</Text>
+                </View>
+            )
+        }
+        else return (
             <View>
                 <Text style={styles.textTitle}>location address</Text>
-                <Text style={styles.textData}>{this.state.job.place.address}</Text>
             </View>
         )
+
     }
 
     renderBorderLine() {
         return (
             <View style={{margin: '3%'}}>
-            <View
-                style={{
-                    borderBottomColor: '#4158d6',
-                    borderBottomWidth: 1,
-                }}
-            />
+                <View
+                    style={{
+                        borderBottomColor: '#4158d6',
+                        borderBottomWidth: 1,
+                    }}
+                />
             </View>
         )
     }
 
-    render () {
+    render() {
         return (
-            <ScrollView style={{ flex: 1}}>
+            <ScrollView style={{flex: 1}}>
                 <MapView style={styles.map}
                          initialRegion={{
                              latitude: this.state.job.place.geoCoords.lat,
                              longitude: this.state.job.place.geoCoords.lon,
                              latitudeDelta: 0.005,
-                             longitudeDelta: 0.005   ,
+                             longitudeDelta: 0.005,
                          }}
                 >
                     <MapView.Marker
-                        coordinate={{latitude: this.state.job.place.geoCoords.lat,
-                            longitude: this.state.job.place.geoCoords.lon}}
+                        coordinate={{
+                            latitude: this.state.job.place.geoCoords.lat,
+                            longitude: this.state.job.place.geoCoords.lon
+                        }}
                         title={this.state.job.bank_name}
                         description={this.state.job.atm_name}
                     />
                 </MapView>
-                <View style={{ flex: 1, position: 'relative'}}>
+                <View style={{flex: 1, position: 'relative'}}>
                     <View style={styles.buttonOpenMap}>
                         <Button
                             title="Open with maps"
@@ -123,13 +132,10 @@ export default class JobInformations extends React.Component {
                         />
                     </View>
                     <View>
-                        {this.renderAdress()}
+                        {this.renderAddress()}
                         {this.renderBorderLine()}
-                        <Text style={styles.textTitle}>Last cleaning</Text>
-                        <Text style={styles.textData}>{this.state.job.lastClean}</Text>
-                        {this.renderBorderLine()}
-                        <Text style={styles.textTitle}>Next cleaning</Text>
-                        <Text style={styles.textData}>{this.state.job.nextClean}</Text>
+                        <Text style={styles.textTitle}>Customer</Text>
+                        <Text style={styles.textData}>{this.state.job.place.customer.name}</Text>
                         {this.renderBorderLine()}
                         {this.renderButtonTasks()}
                     </View>

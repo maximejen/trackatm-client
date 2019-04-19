@@ -9,13 +9,14 @@ import {
 } from 'react-native';
 import { withNavigation } from "react-navigation"
 import TouchableScale from 'react-native-touchable-scale'; // https://github.com/kohver/react-native-touchable-scale
-import { Location, Permissions } from 'expo';
+import {Camera, Location, Permissions, ScreenOrientation} from 'expo';
 
 import { Icon } from 'react-native-elements'
 import { FlatGrid, SuperGridSectionList } from 'react-native-super-grid';
 import {getDistance} from "react-native-image-view/src/utils";
 import geolib from 'geolib'
 import config from "../constants/Config";
+import DropdownAlert from "react-native-dropdownalert";
 
 const DaysOfWeek = [
     "Monday",
@@ -66,7 +67,6 @@ class HomeScreen extends React.Component {
         super(props);
         this.navigate  = props.navigation;
         this.updateTitle("3 tasks remaining");
-
         this.updateOperations();
     }
     updateOperations = async () =>{
@@ -184,11 +184,9 @@ class HomeScreen extends React.Component {
                 };
                 sortedArray.push(item);
             }
-            //console.log("Day :" + DaysOfWeek[i] + "Values : " + toShow);
         }
-        console.log(sortedArray);
         const {navigate} = this.props.navigation;
-
+        Expo.ScreenOrientation.allowAsync(Expo.ScreenOrientation.Orientation.PORTRAIT);
         return (
                 <SuperGridSectionList
                     itemDimension={90}
@@ -219,9 +217,7 @@ class HomeScreen extends React.Component {
     }
 
     render () {
-        const {navigate} = this.props.navigation;
         if (this.state.sections) {
-
         return (
             <View style={styles.container}>
                 {this.renderList()}

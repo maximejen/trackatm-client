@@ -19,10 +19,13 @@ class AuthLoadingScreen extends React.Component {
 
     _bootstrapAsync = async () => {
         const userToken = await AsyncStorage.getItem('token');
+        const cleanerId = await AsyncStorage.getItem('cleanerid');
         const {navigate} = this.props.navigation;
 
-        if (!userToken)
+        if (!userToken || !cleanerId) {
             this.props.navigation.navigate('Login');
+            return
+        }
         let url = config.server_addr + '/api/token?token=' + userToken;
         console.log("url : " + url);
         fetch(url)

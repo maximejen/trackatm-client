@@ -1,12 +1,11 @@
 import config from "../constants/Config";
-import {AsyncStorage, Platform} from "react-native";
-import { ImageManipulator } from 'expo';
+import {AsyncStorage} from "react-native";
 
-export const requestOperationDone = async (beginningDate, data) =>{
+export const requestOperationDone = async (beginningDate, data, job) => {
     //send: operation id et operationTemplate id, date debut, date fin,
     const userToken = await AsyncStorage.getItem('token');
-    let id = 1;//TODO: remplacer par le cleaner id
-    fetch(config.server_addr + '/api/operation/history/' + id, {
+    const cleanerId = await AsyncStorage.getItem('cleanerid');
+    fetch(config.server_addr + '/api/operation/history/' + cleanerId, {
         method: 'POST',
         headers: {
             Accept: 'application/json',
@@ -16,8 +15,9 @@ export const requestOperationDone = async (beginningDate, data) =>{
         body: JSON.stringify({
             beginningDate: beginningDate / 1000,
             endingDate: Date.now() / 1000,
-            operationId: 1,
-            operationTemplateId: 1
+            operationId: job.id,
+            operationTemplateId: job.template.id,
+            initialDate: job.day
         }),
     }).then((response) => response.json())
         .then((responseJson) => {
@@ -38,41 +38,61 @@ const sendTasks = (data, historyId) => {
 
 const createFormData = async (item, itemidx, historyId) => {
     const formData = new FormData();
-    historyId = 16;
-    console.log(item);
-    if (item.content) {
-        item.content.forEach((elem, idx) => {
 
-            formData.append("photo", {
-                name: itemidx + '-' + idx + '-' +Date.now() + '.png',
-                type: elem.type,
-                uri:
-                    Platform.OS === "android" ? elem.uri : elem.localUri
-            });
-        });
-    }
-    console.log(item.text);
     formData.append("checked", item.checked | 0);
     formData.append("comment", item.comment);
     formData.append("imagesForced", item.imageForced | 0);
     formData.append("textInput", item.text);
     formData.append("name", item.key);
-    console.log(formData);
     const userToken = await AsyncStorage.getItem('token');
 
-    fetch(config.server_addr + '/api/operation/task/' + historyId,{
+    fetch(config.server_addr + '/api/operation/task/' + historyId, {
         method: 'POST',
         headers: {
+            Accept: 'application/json',
+            'Content-Type': 'multipart/form-data',
             'token': userToken
         },
         body: formData
     }).then((response) => response.json())
         .then((responseJson) => {
-            console.log("task : " + responseJson);
+            if (item.content) {
+                sendPictures(responseJson.taskId, userToken, item);
+            }
         })
         .catch((err) => {
             console.log(err)
-        })
+        });
 
     return formData;
+};
+
+const sendPictures = (taskOperationId, userToken, item) => {
+
+    item.content.forEach((elem, idx) => {
+        const formData = new FormData();
+
+        let localUri = elem.uri;
+        let filename = Date.now() + localUri.split('/').pop();
+
+        let match = /\.(\w+)$/.exec(filename);
+        let type = match ? `image/${match[1]}` : `image`;
+        formData.append('image', {uri: localUri, name: filename, type});
+
+        fetch(config.server_addr + '/api/operation/image/' + taskOperationId, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'multipart/form-data',
+                'token': userToken
+            },
+            body: formData
+        }).then((response) => response.json())
+            .then((responseJson) => {
+                console.log("task : " + responseJson);
+            })
+            .catch((err) => {
+                console.log(err)
+            });
+    });
 };

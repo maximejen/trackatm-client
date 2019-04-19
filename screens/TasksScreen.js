@@ -3,12 +3,10 @@ import {
     StyleSheet,
     View,
     TouchableOpacity,
-    Text,
     FlatList,
-    Alert,
-    Platform
+    Alert
 } from 'react-native';
-import {Button, Tooltip, Icon} from 'react-native-elements'
+import {Button, Icon} from 'react-native-elements'
 import TaskInputText from '../components/TaskInputText'
 import TaskInputPicture from '../components/TaskInputPicture'
 import {withNavigation} from "react-navigation";
@@ -18,7 +16,7 @@ class TasksScreen extends React.Component {
     static navigationOptions = ({ navigation  }) => {
         const {state} = navigation;
         return {
-            title: 'Home',
+            title: 'Tasks',
             headerLeft: (
                 <TouchableOpacity
                     onPress={() => this.goBack(navigation)}
@@ -32,7 +30,7 @@ class TasksScreen extends React.Component {
                     }}
                 >
                     <Icon
-                        name='x'
+                        name='arrow-left'
                         type='feather'
                     />
                 </TouchableOpacity>
@@ -60,7 +58,8 @@ class TasksScreen extends React.Component {
 
     state = {
         data: null,
-        beginningDate: Date.now()
+        beginningDate: Date.now(),
+        job: this.props.navigation.state.params.job
     };
 
     constructor(props) {
@@ -69,7 +68,7 @@ class TasksScreen extends React.Component {
         this.handleText = this.handleText.bind(this);
         this.handlePicture = this.handlePicture.bind(this);
         this.handleDeletePicture = this.handleDeletePicture.bind(this);
-        this.createTasks(this.props.navigation.state.params.job);
+        this.createTasks(this.props.navigation.state.params.tasks);
     }
 
     createTasks(task) {
@@ -87,46 +86,17 @@ class TasksScreen extends React.Component {
         }
         console.log(newTask);
         this.state = {
-            data: newTask
+            data: newTask,
+            beginningDate: Date.now(),
+            job: this.props.navigation.state.params.job
         };
-    };
-
-    createFormData = (item, itemidx) => {
-        const formData = new FormData();
-
-        console.log(item);
-        if (item.content) {
-            item.content.forEach((elem, idx) => {
-                formData.append("photo", {
-                    name: itemidx + '-' + idx,
-                    type: elem.type,
-                    uri:
-                        Platform.OS === "android" ? elem.uri : elem.uri.replace("file://", "")
-                });
-            });
-        }
-
-
-        formData.append("checked", item.checked);
-        formData.append("comment", item.comment);
-        formData.append("imagesForced", item.imageForced);
-        formData.append("textInput", item.text);
-        console.log(formData);
-        return formData;
     };
 
     sendTasksToServer() {
         const {navigate} = this.props.navigation;
-        requestOperationDone(this.state.beginningDate, this.state.data).done((historyId) => {
-
-            //console.log('historyid :' + historyId);
-              //  this.state.data.forEach((elem, idx) => {
-                //    let data = this.createFormData(elem, idx);
-                  //  console.log(data);
-               // });
+        requestOperationDone(this.state.beginningDate, this.state.data, this.state.job).done(() => {
                 navigate("Home")
-        }
-    )
+        })
     }
 
     handleText(id, text){
@@ -266,4 +236,4 @@ const styles = StyleSheet.create({
         fontSize: 18,
         height: 44,
     },
-})
+});

@@ -5,7 +5,7 @@ import {
     TouchableOpacity,
     Text
 } from 'react-native';
-import { Camera, Permissions } from 'expo';
+import { Camera, Permissions, ImageManipulator, ScreenOrientation } from 'expo';
 import {Icon} from "react-native-elements";
 import DropdownAlert from 'react-native-dropdownalert';
 import {withNavigation} from "react-navigation";
@@ -27,6 +27,8 @@ class TaskCamera extends React.Component {
 
     constructor(props) {
         super(props);
+        Expo.ScreenOrientation.allowAsync(Expo.ScreenOrientation.Orientation.PORTRAIT);
+
     }
 
     async snapPhoto() {
@@ -34,12 +36,16 @@ class TaskCamera extends React.Component {
         console.log('Button Pressed');
         if (this.camera) {
             console.log('Taking photo');
-            const options = { quality: 0, base64: false, fixOrientation: true,
+            const options = { quality: 0.5, base64: true, fixOrientation: true,
                 exif: true};
-            await this.camera.takePictureAsync(options).then(photo => {
-                photo.exif.Orientation = 1;
+            await this.camera.takePictureAsync(options).then(async photo => {
+                const manipResult = await ImageManipulator.manipulateAsync(
+                    photo.localUri || photo.uri,
+                    [{resize: {width: 1024}}],
+                    {compress: 0}
+                );
                 //console.log(photo);
-                this.props.navigation.state.params.setPicture(photo);
+                this.props.navigation.state.params.setPicture(manipResult);
             });
         }
     }
