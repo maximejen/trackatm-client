@@ -8,12 +8,11 @@ import {
     RefreshControl, AsyncStorage,
 } from 'react-native';
 import { withNavigation } from "react-navigation"
-import TouchableScale from 'react-native-touchable-scale'; // https://github.com/kohver/react-native-touchable-scale
-import {Camera, Location, Permissions, ScreenOrientation} from 'expo';
+import {Location, Permissions, ScreenOrientation} from 'expo';
+import LottieView from 'lottie-react-native';
 
 import { Icon } from 'react-native-elements'
-import { FlatGrid, SuperGridSectionList } from 'react-native-super-grid';
-import {getDistance} from "react-native-image-view/src/utils";
+import { SuperGridSectionList } from 'react-native-super-grid';
 import geolib from 'geolib'
 import config from "../constants/Config";
 import DropdownAlert from "react-native-dropdownalert";
@@ -69,6 +68,9 @@ class HomeScreen extends React.Component {
         this.updateTitle("3 tasks remaining");
         this.updateOperations();
     }
+    componentDidMount() {
+        this.animation.play();
+    }
     updateOperations = async () =>{
         const userToken = await AsyncStorage.getItem('token');
 
@@ -82,7 +84,6 @@ class HomeScreen extends React.Component {
         }).then((response) => response.json())
             .then((responseJson) => {
                 console.log(responseJson);
-                //this.setState({sections: [...responseJson]})
                 this.setColor([...responseJson]);
             })
             .catch((err) => {
@@ -235,7 +236,21 @@ class HomeScreen extends React.Component {
         }
         else {
             return (
-                <View/>
+                <View style={{
+                    }}>
+                <LottieView
+                    ref={animation => {
+                        this.animation = animation;
+                    }}
+                    source={require('../assets/5340-line-loader')}
+                    style={{
+                        height: '50%',
+                        width: '50%',
+                        marginTop: '30%',
+                        marginLeft: '12%'
+                    }}
+                />
+                </View>
             )
         }
 
