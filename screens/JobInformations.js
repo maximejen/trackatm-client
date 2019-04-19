@@ -63,14 +63,16 @@ export default class JobInformations extends React.Component {
 
     renderButtonTasks() {
         const {navigate} = this.props.navigation;
-        return (
-            <View style={styles.buttonOpenMap}>
-                <Button
-                    title="Complete tasks"
-                    type="solid"
-                    onPress={() => navigate('Tasks', {tasks: this.state.job.template.tasks, job: this.state.job})}
-                /></View>
-        )
+        if (!this.state.job.done) {
+            return (
+                <View style={styles.buttonOpenMap}>
+                    <Button
+                        title="Complete tasks"
+                        type="solid"
+                        onPress={() => navigate('Tasks', {tasks: this.state.job.template.tasks, job: this.state.job})}
+                    /></View>
+            )
+        }
     }
 
     renderAddress() {

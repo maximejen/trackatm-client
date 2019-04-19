@@ -33,7 +33,7 @@ class HomeScreen extends React.Component {
 
         const {state} = navigation;
         return {
-            title: 'List of ATM',
+            title: 'List of jobs',
             headerLeft: null,
             headerRight: (
                 <TouchableOpacity
@@ -70,10 +70,9 @@ class HomeScreen extends React.Component {
         this.updateOperations();
     }
     updateOperations = async () =>{
-        let id = 1;
         const userToken = await AsyncStorage.getItem('token');
 
-        fetch(config.server_addr + '/api/cleaner/' + id, {
+        fetch(config.server_addr + '/api/cleaner/operations/', {
             method: 'GET',
             headers: {
                 Accept: 'application/json',
@@ -82,13 +81,14 @@ class HomeScreen extends React.Component {
             },
         }).then((response) => response.json())
             .then((responseJson) => {
-                //console.log(responseJson)
-                this.setState({sections: [...responseJson.operations]})
+                console.log(responseJson);
+                //this.setState({sections: [...responseJson]})
+                this.setColor([...responseJson]);
             })
             .catch((err) => {
                 console.log(err)
             })
-    }
+    };
 
     componentWillMount() {
         const {setParams} = this.props.navigation;
@@ -142,29 +142,31 @@ class HomeScreen extends React.Component {
 
     _onRefresh = () => {
         this.setState({refreshing: true});
-        this.updateOperations();
-        this.setState({refreshing: false});
+        this.updateOperations().then(this.setState({refreshing: false}));
+
     };
 
     getDistance(coords) {
         if (!this.state.location || !coords)
             return;
-        return geolib.convertUnit('km', geolib.getDistance(
-            {latitude: coords[0], longitude: coords[0]},
+         return geolib.convertUnit('km', geolib.getDistance(
+            {latitude: coords.lat, longitude: coords.lon},
             {latitude: this.state.location.coords.latitude, longitude: this.state.location.coords.longitude}
         ));
     }
 
-    setColor() {
+    setColor(array) {
         let color = [
-            "#00d1b2",
+            "#2089dc",
             "#2089dc"
         ];
 
-        let array = [...this.state.sections];
         let newData = [];
         for (let i = 0; i < array.length; i++) {
-            Object.assign(array[i], {color: color[Math.floor(Math.random()*color.length)]})
+            if (array[i].done)
+                Object.assign(array[i], {color: "#1dd131"});
+            else
+                Object.assign(array[i], {color: color[Math.floor(Math.random()*color.length)]})
             newData.push(array[i]);
         }
         this.setState({sections: newData});
@@ -203,10 +205,17 @@ class HomeScreen extends React.Component {
                     renderItem={({ item, section, index }) => (
                         <TouchableOpacity
                             onPress={() => navigate('JobInformation', {job: item, name: 'dams'})}
-                            style={[styles.itemContainer, { backgroundColor: '#005dff'}]}>
+                            style={[styles.itemContainer, { backgroundColor: item.color}]}>
                             <Text style={styles.itemName}>{item.place.name}</Text>
                             <Text style={styles.itemCode}>{item.place.description}</Text>
-                            <Text style={styles.itemCode}>{this.getDistance(item.place.geoCoors)} km</Text>
+                            <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
+                            <Text style={styles.itemCode}>{this.getDistance(item.place.geoCoords)} km</Text>
+                                {item.done ?
+                                    <Icon
+                                        name='check'
+                                        type='feather'/>
+                                : null}
+                            </View>
                         </TouchableOpacity>
                     )}
                     renderSectionHeader={({ section }) => (
@@ -272,6 +281,7 @@ const styles = StyleSheet.create({
         paddingLeft: 10,
         paddingRight: 10,
         paddingBottom: 2,
+        textAlign: 'center',
         fontSize: 14,
         fontWeight: 'bold',
         backgroundColor: 'rgba(247,247,247,1.0)',
