@@ -1,8 +1,18 @@
 import config from "../constants/Config";
 import {AsyncStorage} from "react-native";
 
+let currentImage = 0;
+let currentData = 0;
+let nbImages = 0;
+let dataSize = 0;
+let operationId;
 export const requestOperationDone = async (beginningDate, data, job) => {
     //send: operation id et operationTemplate id, date debut, date fin,
+    nbImages = getNbImages(data);
+    dataSize = data.length;
+    currentImage = 0;
+    currentData = 0;
+    operationId = job.id;
     const userToken = await AsyncStorage.getItem('token');
     const cleanerId = await AsyncStorage.getItem('cleanerid');
     fetch(config.server_addr + '/api/operation/history/' + cleanerId, {
@@ -31,14 +41,13 @@ export const requestOperationDone = async (beginningDate, data, job) => {
 
 const sendTasks = (data, historyId) => {
     data.forEach((elem, idx) => {
-        let data = createFormData(elem, idx, historyId);
-        console.log(data);
+        createFormData(elem, idx, historyId, dataSize);
     });
+    waitForRequests(historyId);
 };
 
-const createFormData = async (item, itemidx, historyId) => {
+const createFormData = async (item, itemidx, historyId, dataSize) => {
     const formData = new FormData();
-
     formData.append("checked", item.checked | 0);
     formData.append("comment", item.comment);
     formData.append("imagesForced", item.imageForced | 0);
@@ -56,6 +65,7 @@ const createFormData = async (item, itemidx, historyId) => {
         body: formData
     }).then((response) => response.json())
         .then((responseJson) => {
+            currentData++;
             if (item.content) {
                 sendPictures(responseJson.taskId, userToken, item);
             }
@@ -89,10 +99,50 @@ const sendPictures = (taskOperationId, userToken, item) => {
             body: formData
         }).then((response) => response.json())
             .then((responseJson) => {
-                console.log("task : " + responseJson);
+                //console.log("task : " + responseJson);
+                console.log('Image received');
+                currentImage++;
             })
             .catch((err) => {
                 console.log(err)
             });
     });
+};
+
+function waitForRequests() {
+    console.log('Checking request ...');
+    if(currentImage < nbImages || currentData < dataSize) {
+        window.setTimeout(waitForRequests, 100); /* this checks the flag every 100 milliseconds*/
+    } else {
+        sendMailRequest();
+    }
+}
+
+const sendMailRequest = async () => {
+    const userToken = await AsyncStorage.getItem('token');
+
+    fetch(config.server_addr + '/api/mail/send/' + operationId, {
+        method: 'GET',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'token': userToken
+        }
+    }).then((response) => response.json())
+        .then((responseJson) => {
+            console.log('Mail has been saved');
+        })
+        .catch((err) => {
+            console.log(err)
+        });
+};
+
+const getNbImages = (data) => {
+    let nbImages = 0;
+    data.forEach((elem) => {
+        if (elem.content)
+            nbImages += elem.content.length;
+    });
+    console.log('Il y a ' + nbImages + ' Images');
+    return nbImages;
 };

@@ -83,7 +83,6 @@ class HomeScreen extends React.Component {
             },
         }).then((response) => response.json())
             .then((responseJson) => {
-                console.log(responseJson);
                 this.setColor([...responseJson]);
             })
             .catch((err) => {
