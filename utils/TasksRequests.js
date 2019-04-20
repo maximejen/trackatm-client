@@ -12,7 +12,6 @@ export const requestOperationDone = async (beginningDate, data, job) => {
     dataSize = data.length;
     currentImage = 0;
     currentData = 0;
-    operationId = job.id;
     const userToken = await AsyncStorage.getItem('token');
     const cleanerId = await AsyncStorage.getItem('cleanerid');
     fetch(config.server_addr + '/api/operation/history/' + cleanerId, {
@@ -40,6 +39,7 @@ export const requestOperationDone = async (beginningDate, data, job) => {
 };
 
 const sendTasks = (data, historyId) => {
+    operationId = historyId;
     data.forEach((elem, idx) => {
         createFormData(elem, idx, historyId, dataSize);
     });
