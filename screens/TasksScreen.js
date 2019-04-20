@@ -84,7 +84,6 @@ class TasksScreen extends React.Component {
             };
             newTask.push(item);
         }
-        console.log(newTask);
         this.state = {
             data: newTask,
             beginningDate: Date.now(),
@@ -95,7 +94,7 @@ class TasksScreen extends React.Component {
     sendTasksToServer() {
         const {navigate} = this.props.navigation;
         requestOperationDone(this.state.beginningDate, this.state.data, this.state.job).done(() => {
-                navigate("Home")
+                navigate("Home", {done: true})
         })
     }
 

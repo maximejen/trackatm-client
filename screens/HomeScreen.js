@@ -5,10 +5,10 @@ import {
     Text,
     TouchableOpacity,
     View,
-    RefreshControl, AsyncStorage,
+    RefreshControl, AsyncStorage, ScrollView
 } from 'react-native';
 import { withNavigation } from "react-navigation"
-import {Location, Permissions, ScreenOrientation} from 'expo';
+import {Camera, Location, Permissions, ScreenOrientation} from 'expo';
 import LottieView from 'lottie-react-native';
 
 import { Icon } from 'react-native-elements'
@@ -70,6 +70,13 @@ class HomeScreen extends React.Component {
     }
     componentDidMount() {
         this.animation.play();
+        this.focusListener = this.props.navigation.addListener("didFocus", () => {
+            if (this.props.navigation.state.params.done) {
+                this.dropdown.alertWithType('success', 'Operation has been saved', "");
+                this.updateOperations();
+                this.props.navigation.state.params.done = false;
+            }
+        });
     }
     updateOperations = async () =>{
         const userToken = await AsyncStorage.getItem('token');
@@ -92,8 +99,6 @@ class HomeScreen extends React.Component {
 
     componentWillMount() {
         const {setParams} = this.props.navigation;
-        setParams({demotxt: "looool"});
-        //this.setColor()
         if (Platform.OS === 'android' && !Constants.isDevice) {
             this.setState({
                 errorMessage: 'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
@@ -190,6 +195,7 @@ class HomeScreen extends React.Component {
         const {navigate} = this.props.navigation;
         Expo.ScreenOrientation.allowAsync(Expo.ScreenOrientation.Orientation.PORTRAIT);
         return (
+            <ScrollView>
                 <SuperGridSectionList
                     itemDimension={90}
                     // staticDimension={300}
@@ -204,6 +210,7 @@ class HomeScreen extends React.Component {
                     style={styles.gridView}
                     renderItem={({ item, section, index }) => (
                         <TouchableOpacity
+
                             onPress={() => navigate('JobInformation', {job: item, name: 'dams'})}
                             style={[styles.itemContainer, { backgroundColor: item.color}]}>
                             <Text style={styles.itemName}>{item.place.name}</Text>
@@ -222,6 +229,8 @@ class HomeScreen extends React.Component {
                         <Text style={styles.sectionHeader}>{section.title}</Text>
                     )}
                 />
+                <DropdownAlert style={{zIndex: 20}} ref={ref => this.dropdown = ref} />
+            </ScrollView>
             )
     }
 

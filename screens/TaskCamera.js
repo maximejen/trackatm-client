@@ -44,7 +44,6 @@ class TaskCamera extends React.Component {
                     [{resize: {width: 1024}}],
                     {compress: 0}
                 );
-                //console.log(photo);
                 this.props.navigation.state.params.setPicture(manipResult);
             });
         }
