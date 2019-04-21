@@ -53,6 +53,7 @@ const createFormData = async (item, itemidx, historyId, dataSize) => {
     formData.append("imagesForced", item.imageForced | 0);
     formData.append("textInput", item.text);
     formData.append("name", item.key);
+    formData.append("position", itemidx);
     const userToken = await AsyncStorage.getItem('token');
 
     fetch(config.server_addr + '/api/operation/task/' + historyId, {
