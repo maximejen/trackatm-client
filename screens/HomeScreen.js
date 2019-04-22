@@ -14,7 +14,7 @@ import LottieView from 'lottie-react-native';
 import { Icon } from 'react-native-elements'
 import { SuperGridSectionList } from 'react-native-super-grid';
 import geolib from 'geolib'
-import config from "../constants/Config";
+import config from "../constants/environment";
 import DropdownAlert from "react-native-dropdownalert";
 
 const DaysOfWeek = [
@@ -80,8 +80,8 @@ class HomeScreen extends React.Component {
     }
     updateOperations = async () =>{
         const userToken = await AsyncStorage.getItem('token');
-
-        fetch(config.server_addr + '/api/cleaner/operations/', {
+        console.log("url: " + config().apiUrl);
+        fetch(config().apiUrl + '/api/cleaner/operations/', {
             method: 'GET',
             headers: {
                 Accept: 'application/json',
@@ -154,7 +154,7 @@ class HomeScreen extends React.Component {
     getDistance(coords) {
         if (!this.state.location || !coords)
             return;
-         return geolib.convertUnit('km', geolib.getDistance(
+        return geolib.convertUnit('km', geolib.getDistance(
             {latitude: coords.lat, longitude: coords.lon},
             {latitude: this.state.location.coords.latitude, longitude: this.state.location.coords.longitude}
         ));
@@ -216,12 +216,12 @@ class HomeScreen extends React.Component {
                             <Text style={styles.itemName}>{item.place.name}</Text>
                             <Text style={styles.itemCode}>{item.place.description}</Text>
                             <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
-                            <Text style={styles.itemCode}>{this.getDistance(item.place.geoCoords)} km</Text>
+                                <Text style={styles.itemCode}>{this.getDistance(item.place.geoCoords)} km</Text>
                                 {item.done ?
                                     <Icon
                                         name='check'
                                         type='feather'/>
-                                : null}
+                                    : null}
                             </View>
                         </TouchableOpacity>
                     )}
@@ -231,33 +231,45 @@ class HomeScreen extends React.Component {
                 />
                 <DropdownAlert style={{zIndex: 20}} ref={ref => this.dropdown = ref} />
             </ScrollView>
-            )
+        )
     }
 
     render () {
         if (this.state.sections) {
-        return (
-            <View style={styles.container}>
-                {this.renderList()}
-            </View>
-        )
+            if (this.state.sections.length > 0) {
+                return (
+                    <View style={styles.container}>
+                        {this.renderList()}
+                    </View>
+                )
+            }
+            else {
+                return (
+                        <View style={styles.textContainer}>
+                            <Text style={{fontSize: 30}}>
+                                You have no job
+                            </Text>
+                        </View>
+                )
+            }
+
         }
         else {
             return (
                 <View style={{
-                    }}>
-                <LottieView
-                    ref={animation => {
-                        this.animation = animation;
-                    }}
-                    source={require('../assets/5340-line-loader')}
-                    style={{
-                        height: '50%',
-                        width: '50%',
-                        marginTop: '30%',
-                        marginLeft: '12%'
-                    }}
-                />
+                }}>
+                    <LottieView
+                        ref={animation => {
+                            this.animation = animation;
+                        }}
+                        source={require('../assets/5340-line-loader')}
+                        style={{
+                            height: '50%',
+                            width: '50%',
+                            marginTop: '30%',
+                            marginLeft: '12%'
+                        }}
+                    />
                 </View>
             )
         }
@@ -270,6 +282,11 @@ export default withNavigation(HomeScreen);
 const styles = StyleSheet.create({
     gridView: {
         flex: 1,
+    },
+    textContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     itemContainer: {
         justifyContent: 'flex-end',

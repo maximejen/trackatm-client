@@ -2,7 +2,7 @@ import React from 'react';
 
 import { StyleSheet, View , ImageBackground, AsyncStorage, Keyboard} from 'react-native';
 import { Button, Input } from 'react-native-elements';
-import config from '../constants/Config'
+import config from '../constants/environment'
 
 
 
@@ -21,7 +21,7 @@ export default class LoginScreen extends React.Component {
         const {navigate} = this.props.navigation;
         Keyboard.dismiss();
         this.setState({loading: true});
-        fetch(config.server_addr + '/api/login', {
+        fetch(config().apiUrl + '/api/login', {
             method: 'POST',
             headers: {
                 Accept: 'application/json',

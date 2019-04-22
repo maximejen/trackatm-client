@@ -6,7 +6,7 @@ import {
     StyleSheet,
     View,
 } from 'react-native';
-import config from "../constants/Config";
+import config from "../constants/environment";
 
 class AuthLoadingScreen extends React.Component {
     static navigationOptions = {
@@ -26,7 +26,7 @@ class AuthLoadingScreen extends React.Component {
             this.props.navigation.navigate('Login');
             return
         }
-        let url = config.server_addr + '/api/token?token=' + userToken;
+        let url = config().apiUrl + '/api/token?token=' + userToken;
         console.log("url : " + url);
         fetch(url)
             .then((response) => response.json())

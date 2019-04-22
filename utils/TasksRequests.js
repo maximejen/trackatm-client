@@ -1,4 +1,4 @@
-import config from "../constants/Config";
+import config from "../constants/environment";
 import {AsyncStorage} from "react-native";
 
 let currentImage = 0;
@@ -14,7 +14,7 @@ export const requestOperationDone = async (beginningDate, data, job) => {
     currentData = 0;
     const userToken = await AsyncStorage.getItem('token');
     const cleanerId = await AsyncStorage.getItem('cleanerid');
-    fetch(config.server_addr + '/api/operation/history/' + cleanerId, {
+    fetch(config().apiUrl + '/api/operation/history/' + cleanerId, {
         method: 'POST',
         headers: {
             Accept: 'application/json',
@@ -56,7 +56,7 @@ const createFormData = async (item, itemidx, historyId, dataSize) => {
     formData.append("position", itemidx);
     const userToken = await AsyncStorage.getItem('token');
 
-    fetch(config.server_addr + '/api/operation/task/' + historyId, {
+    fetch(config().apiUrl + '/api/operation/task/' + historyId, {
         method: 'POST',
         headers: {
             Accept: 'application/json',
@@ -90,7 +90,7 @@ const sendPictures = (taskOperationId, userToken, item) => {
         let type = match ? `image/${match[1]}` : `image`;
         formData.append('image', {uri: localUri, name: filename, type});
 
-        fetch(config.server_addr + '/api/operation/image/' + taskOperationId, {
+        fetch(config().apiUrl + '/api/operation/image/' + taskOperationId, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -122,7 +122,7 @@ function waitForRequests() {
 const sendMailRequest = async () => {
     const userToken = await AsyncStorage.getItem('token');
 
-    fetch(config.server_addr + '/api/mail/send/' + operationId, {
+    fetch(config().apiUrl + '/api/mail/send/' + operationId, {
         method: 'GET',
         headers: {
             Accept: 'application/json',

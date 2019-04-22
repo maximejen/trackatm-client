@@ -1,11 +1,14 @@
 {
   "expo": {
-    "name": "trackatm-client",
-    "description": "A very interesting project.",
-    "slug": "trackatm-client",
+    "name": "Holdco",
+    "description": "Application for holdco. This application allow cleaner to see his next job and to complete tasks",
+    "slug": "holdco",
     "privacy": "public",
     "sdkVersion": "31.0.0",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
