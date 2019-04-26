@@ -140,6 +140,9 @@ export default class JobInformations extends React.Component {
                         <Text style={styles.textTitle}>Customer</Text>
                         <Text style={styles.textData}>{this.state.job.place.customer.name}</Text>
                         {this.renderBorderLine()}
+                        <Text style={styles.textTitle}>Location name</Text>
+                        <Text style={styles.textData}>{this.state.job.place.name}</Text>
+                        {this.renderBorderLine()}
                         {this.renderButtonTasks()}
                     </View>
                 </View>

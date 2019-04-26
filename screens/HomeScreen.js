@@ -197,8 +197,8 @@ class HomeScreen extends React.Component {
         return (
             <ScrollView>
                 <SuperGridSectionList
-                    itemDimension={90}
-                    // staticDimension={300}
+                    itemDimension={120}
+                    //staticDimension={500}
                     // fixed
                     // spacing={20}
                     sections={sortedArray}
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         borderRadius: 20,
         padding: 10,
-        height: 100,
+        height: 110,
     },
     itemName: {
         fontSize: 16,
