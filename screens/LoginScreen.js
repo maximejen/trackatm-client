@@ -33,7 +33,6 @@ export default class LoginScreen extends React.Component {
             }),
         }).then((response) => response.json())
             .then((responseJson) => {
-                console.log(responseJson);
                 if (responseJson.success && responseJson.cleanerid >= 0) {
                     this.storeItem(responseJson.token, JSON.stringify(responseJson.cleanerid)).then((value) => {
                         this.setState({loading: false});

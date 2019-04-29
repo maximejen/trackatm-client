@@ -17,7 +17,6 @@ export default class JobInformations extends React.Component {
 
     constructor(props) {
         super(props);
-        console.log(this.props.navigation.state.params.job);
         this.state = ({
             job: this.props.navigation.state.params.job,
         });
@@ -36,7 +35,6 @@ export default class JobInformations extends React.Component {
             latitude: coords.lat,
             longitude: coords.lon
         });
-        console.log(locationDetail);
         this.setState({
             location: locationDetail[0]
         });

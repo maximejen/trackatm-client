@@ -33,9 +33,7 @@ class TaskCamera extends React.Component {
 
     async snapPhoto() {
         this.dropdown.alertWithType('success', 'Picture has been saved', "");
-        console.log('Button Pressed');
         if (this.camera) {
-            console.log('Taking photo');
             const options = { quality: 0.5, base64: true, fixOrientation: true,
                 exif: true};
             await this.camera.takePictureAsync(options).then(async photo => {

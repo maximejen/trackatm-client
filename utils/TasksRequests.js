@@ -30,7 +30,6 @@ export const requestOperationDone = async (beginningDate, data, job) => {
         }),
     }).then((response) => response.json())
         .then((responseJson) => {
-            console.log(responseJson);
             sendTasks(data, responseJson.historyId);
         })
         .catch((err) => {
@@ -89,8 +88,8 @@ const sendPictures = (taskOperationId, userToken, item) => {
         let match = /\.(\w+)$/.exec(filename);
         let type = match ? `image/${match[1]}` : `image`;
         formData.append('image', {uri: localUri, name: filename, type});
-
-        fetch(config().apiUrl + '/api/operation/image/' + taskOperationId, {
+        const url = config().apiUrl + '/api/operation/image/' + taskOperationId + "?timestamp=" + (item.date[idx] / 1000);
+        fetch(url, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -100,8 +99,6 @@ const sendPictures = (taskOperationId, userToken, item) => {
             body: formData
         }).then((response) => response.json())
             .then((responseJson) => {
-                //console.log("task : " + responseJson);
-                console.log('Image received');
                 currentImage++;
             })
             .catch((err) => {
@@ -111,7 +108,6 @@ const sendPictures = (taskOperationId, userToken, item) => {
 };
 
 function waitForRequests() {
-    console.log('Checking request ...');
     if(currentImage < nbImages || currentData < dataSize) {
         window.setTimeout(waitForRequests, 100); /* this checks the flag every 100 milliseconds*/
     } else {
@@ -131,7 +127,6 @@ const sendMailRequest = async () => {
         }
     }).then((response) => response.json())
         .then((responseJson) => {
-            console.log('Mail has been saved');
         })
         .catch((err) => {
             console.log(err)
@@ -144,6 +139,5 @@ const getNbImages = (data) => {
         if (elem.content)
             nbImages += elem.content.length;
     });
-    console.log('Il y a ' + nbImages + ' Images');
     return nbImages;
 };

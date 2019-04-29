@@ -80,7 +80,6 @@ class HomeScreen extends React.Component {
     }
     updateOperations = async () =>{
         const userToken = await AsyncStorage.getItem('token');
-        console.log("url: " + config().apiUrl);
         fetch(config().apiUrl + '/api/cleaner/operations/', {
             method: 'GET',
             headers: {

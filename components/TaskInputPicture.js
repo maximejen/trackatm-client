@@ -43,7 +43,6 @@ class TaskInputPicture extends React.Component {
         let images = this.state.images;
         images.push(picture);
         this.setState({images: images});
-        console.log("Saving picture");
     };
 
     renderChecked() {
@@ -72,7 +71,6 @@ class TaskInputPicture extends React.Component {
     }
 
     toogleViewer(index){
-        console.log("true");
         this.setState({viewer: true, imageId: index})
     }
 

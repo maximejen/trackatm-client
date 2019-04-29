@@ -110,7 +110,10 @@ class TasksScreen extends React.Component {
         let data = this.state.data;
         if (!data[id].content)
             data[id].content = [];
+        if (!data[id].date)
+            data[id].date = [];
         data[id].content.push(picture);
+        data[id].date.push(Date.now());
         this.setState({
             data: data
         });

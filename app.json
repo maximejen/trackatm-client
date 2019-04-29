@@ -24,7 +24,11 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "https://track-atm.com"
+    },
+    "android": {
+      "package": "https://track-atm.com"
     }
   }
 }
