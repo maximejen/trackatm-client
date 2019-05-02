@@ -25,10 +25,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "https://track-atm.com"
+      "bundleIdentifier": "com.holdco.holdco"
     },
     "android": {
-      "package": "https://track-atm.com"
+      "package": "com.holdco.holdco"
     }
   }
 }

@@ -30,6 +30,7 @@ export const requestOperationDone = async (beginningDate, data, job) => {
         }),
     }).then((response) => response.json())
         .then((responseJson) => {
+            console.log(responseJson);
             sendTasks(data, responseJson.historyId);
         })
         .catch((err) => {

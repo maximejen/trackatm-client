@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 //const localhost = Platform.OS === 'ios' ? 'http://localhost:4000/' : 'http://10.0.2.2:4000/';
 const ENV = {
     dev: {
-        apiUrl: "http://2dea013d.ngrok.io",
+        apiUrl: "http://ff80ef36.ngrok.io"
     },
     staging: {
         apiUrl: 'https://track-atm.com'
