@@ -84,7 +84,7 @@ class TaskInputPicture extends React.Component {
     renderImage(item, index)
     {
         return (
-            <View style={{position: 'static'}}>
+            <View>
                 <TouchableOpacity style={{paddingRight: 10}}
                                   onPress={() => this.toogleViewer(index)}
                 >
@@ -155,7 +155,7 @@ class TaskInputPicture extends React.Component {
         if (this.state.edit) {
             return (
                 <View
-                    style={{paddingLeft: "3%", backgroundColor: "#f3f3f3", borderBottomLeftRadius: "15%"}}
+                    style={{paddingLeft: "3%", backgroundColor: "#f3f3f3", borderBottomLeftRadius: 15}}
                 >
                     <TextInput
                         style={{height: 40}}
@@ -189,8 +189,8 @@ class TaskInputPicture extends React.Component {
                 <View
                     style={{
                         borderStyle: "solid",
-                        borderWidth: "1px",
-                        borderRadius: "15%",
+                        borderWidth: 1,
+                        borderRadius: 15,
                         borderColor: "#d6d6d6",
                     }}
                 >
@@ -203,8 +203,8 @@ class TaskInputPicture extends React.Component {
                             justifyContent: "space-between",
                             alignItems: "center",
                             flexDirection: "row",
-                            borderTopLeftRadius: "15%",
-                            borderTopRightRadius: "15%",
+                            borderTopLeftRadius: 15,
+                            borderTopRightRadius: 15,
                         }}
                     >
 

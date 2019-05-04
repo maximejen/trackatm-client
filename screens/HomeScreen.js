@@ -10,7 +10,7 @@ import {
 import { withNavigation } from "react-navigation"
 import {Camera, Location, Permissions, ScreenOrientation} from 'expo';
 import LottieView from 'lottie-react-native';
-
+import { Constants } from 'expo';
 import { Icon } from 'react-native-elements'
 import { SuperGridSectionList } from 'react-native-super-grid';
 import geolib from 'geolib'
