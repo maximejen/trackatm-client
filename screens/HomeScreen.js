@@ -255,20 +255,17 @@ class HomeScreen extends React.Component {
         }
         else {
             return (
-                <View style={{
-                }}>
-                    <LottieView
-                        ref={animation => {
-                            this.animation = animation;
-                        }}
-                        source={require('../assets/5340-line-loader')}
-                        style={{
-                            height: '50%',
-                            width: '50%',
-                            marginTop: '30%',
-                            marginLeft: '12%'
-                        }}
-                    />
+                <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+
+                    <View style={styles.imageWrapper}>
+                        <LottieView
+                            ref={animation => { this.animation = animation; }}
+                            style={styles.animationWrapper}
+                            source={require('../assets/5340-line-loader')}
+                            loop
+                        />
+                    </View>
+
                 </View>
             )
         }
@@ -329,5 +326,23 @@ const styles = StyleSheet.create({
         padding: 10,
         fontSize: 18,
         height: 44,
+    },
+    imageWrapper: {
+        width: 170,
+        height: 170,
+        opacity: 0.85,
+        justifyContent: 'center'
+    },
+    loadingText: {
+        width: '100%',
+        textAlign: 'center',
+    },
+    logoImage: {
+        width: '100%',
+        alignItems: 'center',
+    },
+    animationWrapper: {
+        width: '100%',
+        height: '100%',
     },
 });

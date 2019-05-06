@@ -6,12 +6,15 @@ let currentData = 0;
 let nbImages = 0;
 let dataSize = 0;
 let operationId;
-export const requestOperationDone = async (beginningDate, data, job) => {
+let navigateGlob = null;
+export const requestOperationDone = async (beginningDate, data, job, navigate) => {
     //send: operation id et operationTemplate id, date debut, date fin,
     nbImages = getNbImages(data);
     dataSize = data.length;
     currentImage = 0;
     currentData = 0;
+    navigateGlob= navigate;
+
     const userToken = await AsyncStorage.getItem('token');
     const cleanerId = await AsyncStorage.getItem('cleanerid');
     fetch(config().apiUrl + '/api/operation/history/' + cleanerId, {
@@ -128,6 +131,7 @@ const sendMailRequest = async () => {
         }
     }).then((response) => response.json())
         .then((responseJson) => {
+            navigateGlob("Home", {done: true})
         })
         .catch((err) => {
             console.log(err)

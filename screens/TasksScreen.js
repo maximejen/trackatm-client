@@ -4,13 +4,14 @@ import {
     View,
     TouchableOpacity,
     FlatList,
-    Alert
+    Alert, Text
 } from 'react-native';
 import {Button, Icon} from 'react-native-elements'
 import TaskInputText from '../components/TaskInputText'
 import TaskInputPicture from '../components/TaskInputPicture'
 import {withNavigation} from "react-navigation";
 import {requestOperationDone} from '../utils/TasksRequests'
+import LottieView from 'lottie-react-native';
 
 class TasksScreen extends React.Component {
     static navigationOptions = ({ navigation  }) => {
@@ -42,8 +43,8 @@ class TasksScreen extends React.Component {
         const {navigate} = navigation;
 
         Alert.alert(
-            'Task validation',
-            'Do you want to validate these data ? You can\'t change data after validation',
+            'Leaving',
+            'You are going to leave, tasks will not be saved',
             [
                 {
                     text: 'Cancel',
@@ -59,7 +60,8 @@ class TasksScreen extends React.Component {
     state = {
         data: null,
         beginningDate: Date.now(),
-        job: this.props.navigation.state.params.job
+        job: this.props.navigation.state.params.job,
+        sending: false
     };
 
     constructor(props) {
@@ -87,15 +89,20 @@ class TasksScreen extends React.Component {
         this.state = {
             data: newTask,
             beginningDate: Date.now(),
-            job: this.props.navigation.state.params.job
+            job: this.props.navigation.state.params.job,
+            sending: false
         };
     };
 
-    sendTasksToServer() {
-        const {navigate} = this.props.navigation;
-        requestOperationDone(this.state.beginningDate, this.state.data, this.state.job).done(() => {
-                navigate("Home", {done: true})
-        })
+   async sendTasksToServer() {
+       const {navigate} = this.props.navigation;
+            this.setState({
+                sending: true
+            });
+       this.animation.play();
+
+       await requestOperationDone(this.state.beginningDate, this.state.data, this.state.job, navigate).done(() => {
+            })
     }
 
     handleText(id, text){
@@ -136,7 +143,6 @@ class TasksScreen extends React.Component {
     }
 
     renderText(item, index) {
-
         return (<TaskInputText
             title={item.key}
             checked={item.checked}
@@ -178,12 +184,10 @@ class TasksScreen extends React.Component {
         else return this.renderPicture(item, index)
     };
 
-
-
-    taskValiddation() {
+    taskValidation() {
         Alert.alert(
             'Task validation',
-            'Do you want to validate these data ? You can\'t change data after validation',
+            'Do you want to validate these tasks ? You can\'t change tasks after validation',
             [
                 {
                     text: 'Cancel',
@@ -195,12 +199,26 @@ class TasksScreen extends React.Component {
             {cancelable: false},
         );
     }
-
-
     render () {
         if (!this.state.data) {
             return (
                 <View/>
+            )
+        }
+        else if (this.state.sending) {
+            return (
+                <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                    <Text style={styles.textData}>Sending task, please wait</Text>
+                    <View style={styles.imageWrapper}>
+                        <LottieView
+                            ref={animation => { this.animation = animation; }}
+                            style={styles.animationWrapper}
+                            source={require('../assets/5340-line-loader')}
+                            loop
+                        />
+                    </View>
+
+                </View>
             )
         }
         return (
@@ -214,7 +232,7 @@ class TasksScreen extends React.Component {
                     <Button
                         title="Validate tasks"
                         type="solid"
-                        onPress={() => this.taskValiddation()}
+                        onPress={() => this.taskValidation()}
                     /></View>
             </View>
         )
@@ -237,5 +255,37 @@ const styles = StyleSheet.create({
         padding: 10,
         fontSize: 18,
         height: 44,
+    },
+    textTitle: {
+        fontSize: 16,
+        color: '#ada8a3',
+        paddingTop: '2%',
+        paddingLeft: '3%',
+        paddingRight: '3%'
+    },
+    textData: {
+        paddingBottom: 15,
+        fontSize: 20,
+        paddingLeft: '3%',
+        paddingRight: '3%',
+        textAlign: 'center',
+        color: '#65625f',
+    },
+    imageWrapper: {
+        width: 170,
+        height: 170,
+        opacity: 0.85,
+        justifyContent: 'center'
+    },
+    loadingText: {
+        width: '100%',
+        textAlign: 'center',
+    },
+    logoImage: {
+        alignItems: 'center',
+    },
+    animationWrapper: {
+        width: '100%',
+        height: '100%',
     },
 });

@@ -17,8 +17,7 @@ class TaskCamera extends React.Component {
     };
     state = {
         hasCameraPermission: null,
-        type: Camera.Constants.Type.back,
-        takenPicture: false,
+        type: Camera.Constants.Type.back
     };
     async componentDidMount() {
         const { status } = await Permissions.askAsync(Permissions.CAMERA);
@@ -28,7 +27,6 @@ class TaskCamera extends React.Component {
     constructor(props) {
         super(props);
         Expo.ScreenOrientation.allowAsync(Expo.ScreenOrientation.Orientation.PORTRAIT);
-
     }
 
     async snapPhoto() {
@@ -45,9 +43,6 @@ class TaskCamera extends React.Component {
                     {compress: 0.7}
                 );
                 this.props.navigation.state.params.setPicture(manipResult);
-                this.setState({
-                    takenPicture: false
-                });
             });
         }
     }
@@ -80,7 +75,6 @@ class TaskCamera extends React.Component {
                                 }}
                             >
                                 <TouchableOpacity
-                                    disable={this.state.takenPicture}
                                 style={{
                                     flexGrow: 0.45
                                 }}
@@ -95,7 +89,6 @@ class TaskCamera extends React.Component {
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
-                                    disable={this.state.takenPicture}
                                     onPress={this.snapPhoto.bind(this)}>
                                     <Icon
                                         name='adjust'
