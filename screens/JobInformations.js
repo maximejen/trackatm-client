@@ -61,9 +61,8 @@ export default class JobInformations extends React.Component {
     };
 
     renderButtonTasks() {
-        //TODO remettre le if
         const {navigate} = this.props.navigation;
-        //if (!this.state.job.done) {
+        if (!this.state.job.done) {
         return (
             <View style={styles.buttonOpenMap}>
                 <Button
@@ -72,7 +71,7 @@ export default class JobInformations extends React.Component {
                     onPress={() => navigate('Tasks', {tasks: this.state.job.template.tasks, job: this.state.job})}
                 /></View>
         )
-        //}
+        }
     }
 
     renderAddress() {
