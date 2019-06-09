@@ -5,7 +5,7 @@ import {
     TouchableOpacity,
     Text
 } from 'react-native';
-import { Camera, Permissions, ImageManipulator, ScreenOrientation } from 'expo';
+import {Camera, Permissions, ImageManipulator, ScreenOrientation} from 'expo';
 import {Icon} from "react-native-elements";
 import DropdownAlert from 'react-native-dropdownalert';
 import {withNavigation} from "react-navigation";
@@ -17,11 +17,13 @@ class TaskCamera extends React.Component {
     };
     state = {
         hasCameraPermission: null,
-        type: Camera.Constants.Type.back
+        type: Camera.Constants.Type.back,
+        flashOn: false
     };
+
     async componentDidMount() {
-        const { status } = await Permissions.askAsync(Permissions.CAMERA);
-        this.setState({ hasCameraPermission: status === 'granted' });
+        const {status} = await Permissions.askAsync(Permissions.CAMERA);
+        this.setState({hasCameraPermission: status === 'granted'});
     }
 
     constructor(props) {
@@ -34,30 +36,41 @@ class TaskCamera extends React.Component {
             takenPicture: true
         });
         if (this.camera) {
-            const options = { quality: 0, base64: true, fixOrientation: true,
-                exif: true};
+            const options = {
+                quality: 0, base64: true, fixOrientation: true,
+                exif: true
+            };
             await this.camera.takePictureAsync(options).then(async photo => {
                 const manipResult = await ImageManipulator.manipulateAsync(
                     photo.localUri || photo.uri,
-                    [{resize: {width: 1024}}],
-                    {compress: 0.7}
+                    [{resize: {width: 300}}],
+                    {compress: 0.9}
                 );
                 this.props.navigation.state.params.setPicture(manipResult);
             });
         }
     }
 
-    render () {
-        const { hasCameraPermission } = this.state;
+    async handleFlash() {
+        this.setState({
+            flashOn: !this.state.flashOn
+        })
+    }
+
+    render() {
+        const {hasCameraPermission} = this.state;
         if (hasCameraPermission === null) {
-            return <View />;
+            return <View/>;
         } else if (hasCameraPermission === false) {
             return <Text>No access to camera</Text>;
         } else {
             return (
-                <View style={{ flex: 1 }}>
-                    <Camera style={{ flex: 1 }} ref={ref => { this.camera = ref; }} type={this.state.type}>
-                        <DropdownAlert ref={ref => this.dropdown = ref} />
+                <View style={{flex: 1}}>
+                    <Camera style={{flex: 1}} ref={ref => {
+                        this.camera = ref;
+                    }} type={this.state.type}
+                            flashMode={this.state.flashOn ? Camera.Constants.FlashMode.torch : Camera.Constants.FlashMode.off}>
+                        <DropdownAlert ref={ref => this.dropdown = ref}/>
                         <View
                             style={{
                                 flex: 1,
@@ -69,16 +82,16 @@ class TaskCamera extends React.Component {
                                 style={{
                                     flex: 1,
                                     flexDirection: 'row',
-                                    justifyContent: 'flex-start',
-                                    alignItems:'flex-end',
+                                    justifyContent: 'center',
+                                    alignItems: 'flex-end',
                                     paddingBottom: "7%"
                                 }}
                             >
                                 <TouchableOpacity
-                                style={{
-                                    flexGrow: 0.45
-                                }}
-                                onPress={() => this.props.navigation.goBack()}
+                                    style={{
+                                        width: "33%"
+                                    }}
+                                    onPress={() => this.props.navigation.goBack()}
                                 >
                                     <Icon
                                         style={{justifyContent: "flex-start"}}
@@ -89,11 +102,27 @@ class TaskCamera extends React.Component {
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
+                                    style={{
+                                        width: "33%"
+                                    }}
                                     onPress={this.snapPhoto.bind(this)}>
                                     <Icon
                                         name='adjust'
                                         color="#ffffff"
                                         size={60}
+                                    />
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={{
+                                        width: "33%"
+                                    }}
+                                    onPress={this.handleFlash.bind(this)}>
+                                    <Icon
+                                        style={{justifyContent: "flex-end"}}
+                                        name={this.state.flashOn ? 'flash-on' : 'flash-off'}
+                                        color="#ffffff"
+                                        size={40}
                                     />
                                 </TouchableOpacity>
 

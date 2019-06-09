@@ -7,12 +7,12 @@ import {
     View,
     RefreshControl, AsyncStorage, ScrollView
 } from 'react-native';
-import { withNavigation } from "react-navigation"
-import {Camera, Location, Permissions, ScreenOrientation} from 'expo';
+import {withNavigation} from "react-navigation"
+import {Camera, Location, Permissions, ScreenOrientation, Updates} from 'expo';
 import LottieView from 'lottie-react-native';
-import { Constants } from 'expo';
-import { Icon } from 'react-native-elements'
-import { SuperGridSectionList } from 'react-native-super-grid';
+import {Constants} from 'expo';
+import {Icon} from 'react-native-elements'
+import {SuperGridSectionList} from 'react-native-super-grid';
 import geolib from 'geolib'
 import config from "../constants/environment";
 import DropdownAlert from "react-native-dropdownalert";
@@ -28,12 +28,28 @@ const DaysOfWeek = [
 ];
 
 class HomeScreen extends React.Component {
-    static navigationOptions = ({ navigation  }) => {
+
+    static navigationOptions = ({navigation}) => {
 
         const {state} = navigation;
         return {
             title: 'List of jobs',
-            headerLeft: null,
+            headerLeft: <TouchableOpacity
+                onPress={() => Updates.reload()}
+                style={{
+                    height: 45,
+                    width: 45,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: 10,
+
+                }}
+            >
+                <Icon
+                    name='refresh-ccw'
+                    type='feather'
+                />
+            </TouchableOpacity>,
             headerRight: (
                 <TouchableOpacity
                     onPress={() => this.logout(navigation)}
@@ -64,10 +80,11 @@ class HomeScreen extends React.Component {
 
     constructor(props) {
         super(props);
-        this.navigate  = props.navigation;
+        this.navigate = props.navigation;
         this.updateTitle("3 tasks remaining");
         this.updateOperations();
     }
+
     componentDidMount() {
         this.animation.play();
         this.focusListener = this.props.navigation.addListener("didFocus", () => {
@@ -78,7 +95,8 @@ class HomeScreen extends React.Component {
             }
         });
     }
-    updateOperations = async () =>{
+
+    async updateOperations() {
         const userToken = await AsyncStorage.getItem('token');
         fetch(config().apiUrl + '/api/cleaner/operations/', {
             method: 'GET',
@@ -108,7 +126,7 @@ class HomeScreen extends React.Component {
     }
 
     _getLocationAsync = async () => {
-        let { status } = await Permissions.askAsync(Permissions.LOCATION);
+        let {status} = await Permissions.askAsync(Permissions.LOCATION);
         if (status !== 'granted') {
             this.setState({
                 errorMessage: 'Permission to access location was denied',
@@ -116,7 +134,7 @@ class HomeScreen extends React.Component {
         }
 
         let location = await Location.getCurrentPositionAsync({});
-        this.setState({ location });
+        this.setState({location});
     };
 
 
@@ -170,7 +188,7 @@ class HomeScreen extends React.Component {
             if (array[i].done)
                 Object.assign(array[i], {color: "#1dd131"});
             else
-                Object.assign(array[i], {color: color[Math.floor(Math.random()*color.length)]})
+                Object.assign(array[i], {color: color[Math.floor(Math.random() * color.length)]})
             newData.push(array[i]);
         }
         this.setState({sections: newData});
@@ -178,14 +196,21 @@ class HomeScreen extends React.Component {
 
     renderList() {
         let sortedArray = [];
+
+        // document.write('<br>5 days ago was: ' + d.toLocaleString());
         for (let i = 0; i < DaysOfWeek.length; i++) {
+            let d = new Date();
             let toShow = this.state.sections.filter((item) => {
-                if (item.day === DaysOfWeek[i])
+                if (item.day === DaysOfWeek[i] && !item.done)
                     return item;
             });
             if (toShow.length > 0) {
+                const todayDayNumber = d.getDay() + (d.getDay() === 0 ? 6 : 1);
+                const differenceToNewDay = todayDayNumber - i;
+                console.log(todayDayNumber, i, differenceToNewDay);
+                d.setDate(d.getDate() - differenceToNewDay);
                 let item = {
-                    title: DaysOfWeek[i],
+                    title: DaysOfWeek[i] + ` - ${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${("0" + d.getDate()).slice(-2)}`,
                     data: toShow
                 };
                 sortedArray.push(item);
@@ -207,11 +232,11 @@ class HomeScreen extends React.Component {
                             onRefresh={this._onRefresh}
                         />}
                     style={styles.gridView}
-                    renderItem={({ item, section, index }) => (
+                    renderItem={({item, section, index}) => (
                         <TouchableOpacity
 
                             onPress={() => navigate('JobInformation', {job: item, name: 'dams'})}
-                            style={[styles.itemContainer, { backgroundColor: item.color}]}>
+                            style={[styles.itemContainer, {backgroundColor: item.color}]}>
                             <Text style={styles.itemName}>{item.place.name}</Text>
                             <Text style={styles.itemCode}>{item.place.description}</Text>
                             <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -224,47 +249,53 @@ class HomeScreen extends React.Component {
                             </View>
                         </TouchableOpacity>
                     )}
-                    renderSectionHeader={({ section }) => (
+                    renderSectionHeader={({section}) => (
                         <Text style={styles.sectionHeader}>{section.title}</Text>
                     )}
                 />
-                <DropdownAlert style={{zIndex: 20}} ref={ref => this.dropdown = ref} />
+                <DropdownAlert style={{zIndex: 20}} ref={ref => this.dropdown = ref}/>
             </ScrollView>
         )
     }
 
-    render () {
+    render() {
+        const version = <Text style={{marginLeft: "auto", marginRight: "auto", fontSize: 12}}>{config().version}</Text>;
         if (this.state.sections) {
             if (this.state.sections.length > 0) {
                 return (
-                    <View style={styles.container}>
-                        {this.renderList()}
+                    <>
+                        <View style={styles.container}>
+                            {this.renderList()}
+                        </View>
+                        {version}
+                    </>
+                )
+            } else {
+                return (
+                    <View style={styles.textContainer}>
+                        <Text style={{fontSize: 30}}>
+                            You have no job
+                        </Text>
+                        {version}
                     </View>
                 )
             }
-            else {
-                return (
-                        <View style={styles.textContainer}>
-                            <Text style={{fontSize: 30}}>
-                                You have no job
-                            </Text>
-                        </View>
-                )
-            }
 
-        }
-        else {
+        } else {
             return (
                 <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
 
                     <View style={styles.imageWrapper}>
                         <LottieView
-                            ref={animation => { this.animation = animation; }}
+                            ref={animation => {
+                                this.animation = animation;
+                            }}
                             style={styles.animationWrapper}
                             source={require('../assets/5340-line-loader')}
                             loop
                         />
                     </View>
+                    {version}
 
                 </View>
             )

@@ -26,7 +26,15 @@ class AuthLoadingScreen extends React.Component {
             this.props.navigation.navigate('Login');
             return
         }
-        let url = config().apiUrl + '/api/token?token=' + userToken;
+        let url = config().apiUrl + '/api/upload-app-version?version=' + config().version;
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'multipart/form-data',
+                'token': userToken
+            }});
+        url = config().apiUrl + '/api/token?token=' + userToken;
         fetch(url)
             .then((response) => response.json())
             .then((responseJson) => {

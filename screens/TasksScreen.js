@@ -14,7 +14,23 @@ import {requestOperationDone} from '../utils/TasksRequests'
 import LottieView from 'lottie-react-native';
 
 class TasksScreen extends React.Component {
-    static navigationOptions = ({ navigation  }) => {
+    state = {
+        data: null,
+        beginningDate: Date.now(),
+        job: this.props.navigation.state.params.job,
+        sending: false
+    };
+
+    constructor(props) {
+        super(props);
+        this.handleChecked = this.handleChecked.bind(this);
+        this.handleText = this.handleText.bind(this);
+        this.handlePicture = this.handlePicture.bind(this);
+        this.handleDeletePicture = this.handleDeletePicture.bind(this);
+        this.createTasks(this.props.navigation.state.params.tasks);
+    }
+
+    static navigationOptions = ({navigation}) => {
         const {state} = navigation;
         return {
             title: 'Tasks',
@@ -39,6 +55,7 @@ class TasksScreen extends React.Component {
         }
 
     };
+
     static goBack(navigation) {
         const {navigate} = navigation;
 
@@ -55,22 +72,6 @@ class TasksScreen extends React.Component {
             ],
             {cancelable: false},
         );
-    }
-
-    state = {
-        data: null,
-        beginningDate: Date.now(),
-        job: this.props.navigation.state.params.job,
-        sending: false
-    };
-
-    constructor(props) {
-        super(props);
-        this.handleChecked = this.handleChecked.bind(this);
-        this.handleText = this.handleText.bind(this);
-        this.handlePicture = this.handlePicture.bind(this);
-        this.handleDeletePicture = this.handleDeletePicture.bind(this);
-        this.createTasks(this.props.navigation.state.params.tasks);
     }
 
     createTasks(task) {
@@ -94,18 +95,18 @@ class TasksScreen extends React.Component {
         };
     };
 
-   async sendTasksToServer() {
-       const {navigate} = this.props.navigation;
-            this.setState({
-                sending: true
-            });
-       this.animation.play();
+    async sendTasksToServer() {
+        const {navigate} = this.props.navigation;
+        this.setState({
+            sending: true
+        });
+        this.animation.play();
 
-       await requestOperationDone(this.state.beginningDate, this.state.data, this.state.job, navigate).done(() => {
-            })
+        await requestOperationDone(this.state.beginningDate, this.state.data, this.state.job, navigate).done(() => {
+        })
     }
 
-    handleText(id, text){
+    handleText(id, text) {
         let data = this.state.data;
         data[id].text = text;
         this.setState({
@@ -113,7 +114,7 @@ class TasksScreen extends React.Component {
         });
     }
 
-    handlePicture(id, picture){
+    handlePicture(id, picture) {
         let data = this.state.data;
         if (!data[id].content)
             data[id].content = [];
@@ -126,7 +127,7 @@ class TasksScreen extends React.Component {
         });
     }
 
-    handleDeletePicture(id, idx){
+    handleDeletePicture(id, idx) {
         let data = this.state.data;
         data[id].content.splice(idx, 1);
         this.setState({
@@ -149,8 +150,8 @@ class TasksScreen extends React.Component {
             comment={item.comment}
             id={index}
             item={item}
-            handleChecked = {this.handleChecked}
-            handleText = {this.handleText}
+            handleChecked={this.handleChecked}
+            handleText={this.handleText}
             iconRight
             onPress={() => item.checked = !item.checked}
         />)
@@ -165,10 +166,10 @@ class TasksScreen extends React.Component {
                     comment={item.comment}
                     id={index}
                     item={item}
-                    handleChecked = {this.handleChecked}
-                    handlePicture = {this.handlePicture}
-                    handleText = {this.handleText}
-                    handleDeletePicture = {this.handleDeletePicture}
+                    handleChecked={this.handleChecked}
+                    handlePicture={this.handlePicture}
+                    handleText={this.handleText}
+                    handleDeletePicture={this.handleDeletePicture}
                     iconRight
                     onPress={() => item.checked = !item.checked}
                 />
@@ -177,8 +178,7 @@ class TasksScreen extends React.Component {
     }
 
 
-    renderItems( item, index)
-    {
+    renderItems(item, index) {
         if (!item.imageForced)
             return this.renderText(item, index);
         else return this.renderPicture(item, index)
@@ -199,19 +199,21 @@ class TasksScreen extends React.Component {
             {cancelable: false},
         );
     }
-    render () {
+
+    render() {
         if (!this.state.data) {
             return (
                 <View/>
             )
-        }
-        else if (this.state.sending) {
+        } else if (this.state.sending) {
             return (
                 <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
                     <Text style={styles.textData}>Sending task, please wait</Text>
                     <View style={styles.imageWrapper}>
                         <LottieView
-                            ref={animation => { this.animation = animation; }}
+                            ref={animation => {
+                                this.animation = animation;
+                            }}
                             style={styles.animationWrapper}
                             source={require('../assets/5340-line-loader')}
                             loop
