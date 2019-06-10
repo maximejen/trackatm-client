@@ -18,13 +18,13 @@ import config from "../constants/environment";
 import DropdownAlert from "react-native-dropdownalert";
 
 const DaysOfWeek = [
+    "Sunday",
     "Monday",
     "Tuesday",
     "Wednesday",
     "Thursday",
     "Friday",
-    "Saturday",
-    "Sunday"
+    "Saturday"
 ];
 
 class HomeScreen extends React.Component {
@@ -75,7 +75,7 @@ class HomeScreen extends React.Component {
     state = {
         refreshing: false,
         location: null,
-        sections: null
+        planning: null
     };
 
     constructor(props) {
@@ -96,9 +96,27 @@ class HomeScreen extends React.Component {
         });
     }
 
+    fromFlatToTree(operations) {
+        let tree = {Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: [], Sunday: []};
+        operations.map((operation) => {
+            tree[operation.day].push(operation);
+        });
+        return tree;
+    }
+
+    fromTreeToFlat(tree) {
+        let flat = [];
+        Object.Keys(tree).map((day) => {
+            tree[day].map((operation) => {
+                flat.push(operation);
+            });
+        });
+        return flat;
+    }
+
     async updateOperations() {
         const userToken = await AsyncStorage.getItem('token');
-        fetch(config().apiUrl + '/api/cleaner/operations/', {
+        fetch(config().apiUrl + '/api/cleaner/operations/?flat=false', {
             method: 'GET',
             headers: {
                 Accept: 'application/json',
@@ -107,7 +125,10 @@ class HomeScreen extends React.Component {
             },
         }).then((response) => response.json())
             .then((responseJson) => {
-                this.setColor([...responseJson]);
+                // const planning = this.fromFlatToTree(responseJson);
+                // this.setState({planning});
+                this.setState({planning: responseJson});
+                // this.setColor([...responseJson]);
             })
             .catch((err) => {
                 console.log(err)
@@ -188,34 +209,113 @@ class HomeScreen extends React.Component {
             if (array[i].done)
                 Object.assign(array[i], {color: "#1dd131"});
             else
-                Object.assign(array[i], {color: color[Math.floor(Math.random() * color.length)]})
+                Object.assign(array[i], {color: color[Math.floor(Math.random() * color.length)]});
             newData.push(array[i]);
         }
-        this.setState({sections: newData});
+        this.setState({planning: newData});
     }
 
     renderList() {
         let sortedArray = [];
 
-        // document.write('<br>5 days ago was: ' + d.toLocaleString());
-        for (let i = 0; i < DaysOfWeek.length; i++) {
-            let d = new Date();
-            let toShow = this.state.sections.filter((item) => {
-                if (item.day === DaysOfWeek[i] && !item.done)
-                    return item;
-            });
-            if (toShow.length > 0) {
-                const todayDayNumber = d.getDay() + (d.getDay() === 0 ? 6 : 1);
-                const differenceToNewDay = todayDayNumber - i;
-                console.log(todayDayNumber, i, differenceToNewDay);
-                d.setDate(d.getDate() - differenceToNewDay);
+        const { planning } = this.state;
+        Object.keys(planning).map((date) => {
+            const dayOperations = planning[date];
+            const actualDay = new Date(date);
+            const filteredOperations = dayOperations.filter((operation) => !operation.done);
+            if (filteredOperations.length > 0) {
+                let operations = filteredOperations.map((operation) => {
+                    Object.assign(operation, {color: "#2089dc"});
+                    return operation;
+                });
                 let item = {
-                    title: DaysOfWeek[i] + ` - ${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${("0" + d.getDate()).slice(-2)}`,
-                    data: toShow
+                    title: DaysOfWeek[actualDay.getDay()] + " - " + date,
+                    data: operations
                 };
                 sortedArray.push(item);
             }
-        }
+        });
+
+        // while (iDate.getDate() !== end.getDate()) {
+        //     console.log(`${iDate.getFullYear()}-${("0" + (iDate.getMonth() + 1)).slice(-2)}-${("0" + iDate.getDate()).slice(-2)}`);
+        //
+        //
+        //     const day = DaysOfWeek[iDate.getDay()];
+        //     planning[day].map((operation) => {
+        //         Object.assign(operation, {color: "#2089dc"});
+        //         let item = {
+        //             title: day + `${iDate.getFullYear()}-${("0" + (iDate.getMonth() + 1)).slice(-2)}-${("0" + iDate.getDate()).slice(-2)}`,
+        //             data: {...operation, color: "#2089dc"}
+        //         };
+        //         // console.log(item);
+        //         sortedArray.push(item);
+        //     });
+        //
+        //     iDate.setDate(iDate.getDate() + 1);
+        // }
+
+        // document.write('<br>5 days ago was: ' + d.toLocaleString());
+        // for (let i = 0; i < DaysOfWeek.length; i++) {
+        //     let d = new Date();
+        //     d.setDate(d.getDate());
+        //     let toShow = this.state.planning.filter((item) => {
+        //         if (item.day === DaysOfWeek[i] && !item.done)
+        //             return item;
+        //     });
+        //     if (toShow.length > 0) {
+        //         const todayDayNumber = d.getDay();
+        //         const differenceToNewDay = todayDayNumber - i;
+        //         d.setDate(d.getDate() - differenceToNewDay);
+        //         const startTitle = differenceToNewDay === 0 ? "Today - " : "";
+        //         let item = {
+        //             title: startTitle + DaysOfWeek[i] + ` - ${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${("0" + d.getDate()).slice(-2)}`,
+        //             data: toShow
+        //         };
+        //         sortedArray.push(item);
+        //     }
+        // }
+        //
+        // console.log(sortedArray);
+
+        // for (let i = 0; i < DaysOfWeek.length; i++) {
+        //     let d = new Date();
+        //     let secondWeekElement = this.state.sections.filter((item) => {
+        //         if (item.day === DaysOfWeek[i])
+        //             return item;
+        //         if (item.done) {
+        //             item.color = "#2089dc";
+        //             item.done = false;
+        //         }
+        //     });
+        //     if (secondWeekElement.length > 0) {
+        //         const todayDayNumber = d.getDay();
+        //         const differenceToNewDay = todayDayNumber - i;
+        //         d.setDate(d.getDate() - differenceToNewDay);
+        //         let item = {
+        //             title: DaysOfWeek[i] + ` - ${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${("0" + d.getDate()).slice(-2)}`,
+        //             data: secondWeekElement
+        //         };
+        //         sortedArray.push(item);
+        //     }
+        // }
+
+        // const {planning} = this.state;
+        //
+        // Object.keys(planning).map((day) => {
+        //     let d = new Date();
+        //     const todayDayNumber = d.getDay();
+        //     const differenceToNewDay = todayDayNumber - DaysOfWeek.findIndex((index) => index === day);
+        //     d.setDate(d.getDate() - differenceToNewDay);
+        //     d.setDate(d.getDate() + 7);
+        //     planning[day].map((operation) => {
+        //         let item = {
+        //             title: day + ` - ${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${("0" + d.getDate()).slice(-2)}`,
+        //             data: {...operation, color: "#2089dc"}
+        //         };
+        //         sortedArray.push(item);
+        //     })
+        // });
+
         const {navigate} = this.props.navigation;
         Expo.ScreenOrientation.allowAsync(Expo.ScreenOrientation.Orientation.PORTRAIT);
         return (
@@ -260,8 +360,10 @@ class HomeScreen extends React.Component {
 
     render() {
         const version = <Text style={{marginLeft: "auto", marginRight: "auto", fontSize: 12}}>{config().version}</Text>;
-        if (this.state.sections) {
-            if (this.state.sections.length > 0) {
+        const { planning } = this.state;
+        if (planning) {
+            const condition = Object.keys(planning).every((day) => planning[day].length === 0);
+            if (!condition) {
                 return (
                     <>
                         <View style={styles.container}>
