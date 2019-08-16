@@ -23,7 +23,7 @@ export const requestOperationDone = async (beginningDate, data, job, navigate) =
         endingDate: Date.now() / 1000,
         operationId: job.id,
         operationTemplateId: job.template.id,
-        initialDate: job.day,
+        initialDate: job.initialDate,
         tasks: data
     });
 

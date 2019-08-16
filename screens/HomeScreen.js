@@ -334,8 +334,7 @@ class HomeScreen extends React.Component {
                     style={styles.gridView}
                     renderItem={({item, section, index}) => (
                         <TouchableOpacity
-
-                            onPress={() => navigate('JobInformation', {job: item, name: 'dams'})}
+                            onPress={() => navigate('JobInformation', {job: item, name: 'dams', initialDate: section.title.substr(-10, 10)})}
                             style={[styles.itemContainer, {backgroundColor: item.color}]}>
                             <Text style={styles.itemName}>{item.place.name}</Text>
                             <Text style={styles.itemCode}>{item.place.description}</Text>

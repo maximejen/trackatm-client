@@ -9,7 +9,7 @@
       "ios",
       "android"
     ],
-    "version": "1.0.3",
+    "version": "2.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "splash": {
@@ -34,7 +34,12 @@
       }
     },
     "android": {
-      "package": "com.holdco.holdco"
+      "package": "com.holdco.holdco",
+      "permissions": [
+        "CAMERA",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
     }
   }
 }

@@ -19,7 +19,7 @@ export default class JobInformations extends React.Component {
     constructor(props) {
         super(props);
         this.state = ({
-            job: this.props.navigation.state.params.job,
+            job: {...this.props.navigation.state.params.job, initialDate: this.props.navigation.state.params.initialDate}
         });
         this.updateTitle(this.state.job.place.name);
         this._getLocationAsync(this.state.job.place.geoCoords);

@@ -2,11 +2,11 @@ import { Constants } from 'expo';
 import { Platform } from 'react-native';
 //const localhost = Platform.OS === 'ios' ? 'http://localhost:4000/' : 'http://10.0.2.2:4000/';
 
-const version = "1.0.8";
+const version = "1.0.9";
 
 const ENV = {
     dev: {
-        apiUrl: "http://78ca9c2f.ngrok.io",
+        apiUrl: "http://53e3978f.ngrok.io",
         version: version
     },
     staging: {
