@@ -5,7 +5,10 @@ import {
     TouchableOpacity,
     Text
 } from 'react-native';
-import {Camera, Permissions, ImageManipulator, ScreenOrientation} from 'expo';
+import { Camera } from 'expo-camera';
+import * as Permissions from 'expo-permissions';
+import * as ImageManipulator from 'expo-image-manipulator';
+import { ScreenOrientation } from 'expo';
 import {Icon} from "react-native-elements";
 import DropdownAlert from 'react-native-dropdownalert';
 import {withNavigation} from "react-navigation";
@@ -28,7 +31,7 @@ class TaskCamera extends React.Component {
 
     constructor(props) {
         super(props);
-        Expo.ScreenOrientation.allowAsync(Expo.ScreenOrientation.Orientation.PORTRAIT);
+        ScreenOrientation.lockAsync(ScreenOrientation.Orientation.PORTRAIT_UP);
     }
 
     async snapPhoto() {

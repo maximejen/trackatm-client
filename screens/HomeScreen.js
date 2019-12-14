@@ -8,9 +8,12 @@ import {
     RefreshControl, AsyncStorage, ScrollView
 } from 'react-native';
 import {withNavigation} from "react-navigation"
-import {Camera, Location, Permissions, ScreenOrientation, Updates} from 'expo';
+import { Updates } from 'expo';
+import * as Permissions from 'expo-permissions';
+import * as Location from 'expo-location';
+import { ScreenOrientation } from 'expo';
 import LottieView from 'lottie-react-native';
-import {Constants} from 'expo';
+import { Constants } from "expo-constants"
 import {Icon} from 'react-native-elements'
 import {SuperGridSectionList} from 'react-native-super-grid';
 import geolib from 'geolib'
@@ -317,7 +320,7 @@ class HomeScreen extends React.Component {
         // });
 
         const {navigate} = this.props.navigation;
-        Expo.ScreenOrientation.allowAsync(Expo.ScreenOrientation.Orientation.PORTRAIT);
+        ScreenOrientation.lockAsync(ScreenOrientation.Orientation.PORTRAIT_UP);
         return (
             <ScrollView>
                 <SuperGridSectionList

@@ -7,7 +7,9 @@ import {
     View,
     Linking
 } from 'react-native';
-import {MapView, Location, Permissions} from 'expo';
+import MapView from 'react-native-maps';
+import * as Permissions from 'expo-permissions';
+import * as Location from 'expo-location';
 import {Button} from 'react-native-elements';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
