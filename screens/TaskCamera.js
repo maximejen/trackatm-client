@@ -1,14 +1,9 @@
 import React from 'react';
-import {
-    StyleSheet,
-    View,
-    TouchableOpacity,
-    Text
-} from 'react-native';
-import { Camera } from 'expo-camera';
+import {StyleSheet, View, TouchableOpacity, Text} from 'react-native';
+import {Camera} from 'expo-camera';
 import * as Permissions from 'expo-permissions';
 import * as ImageManipulator from 'expo-image-manipulator';
-import { ScreenOrientation } from 'expo';
+import * as ScreenOrientation from 'expo-screen-orientation'
 import {Icon} from "react-native-elements";
 import DropdownAlert from 'react-native-dropdownalert';
 import {withNavigation} from "react-navigation";
@@ -24,14 +19,14 @@ class TaskCamera extends React.Component {
         flashOn: false
     };
 
-    async componentDidMount() {
-        const {status} = await Permissions.askAsync(Permissions.CAMERA);
-        this.setState({hasCameraPermission: status === 'granted'});
-    }
-
     constructor(props) {
         super(props);
         ScreenOrientation.lockAsync(ScreenOrientation.Orientation.PORTRAIT_UP);
+    }
+
+    async componentDidMount() {
+        const {status} = await Permissions.askAsync(Permissions.CAMERA);
+        this.setState({hasCameraPermission: status === 'granted'});
     }
 
     async snapPhoto() {

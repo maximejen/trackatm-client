@@ -6,7 +6,7 @@ const version = "1.1.1";
 
 const ENV = {
     dev: {
-        apiUrl: "https://track-atm.com",
+        apiUrl: "http://09bc1eec.ngrok.io",
         version: version
     },
     staging: {

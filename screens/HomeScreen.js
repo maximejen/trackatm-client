@@ -8,12 +8,12 @@ import {
     RefreshControl, AsyncStorage, ScrollView
 } from 'react-native';
 import {withNavigation} from "react-navigation"
-import { Updates } from 'expo';
+import {Updates} from 'expo';
 import * as Permissions from 'expo-permissions';
 import * as Location from 'expo-location';
-import { ScreenOrientation } from 'expo';
+import * as ScreenOrientation from 'expo-screen-orientation'
 import LottieView from 'lottie-react-native';
-import { Constants } from "expo-constants"
+import {Constants} from "expo-constants"
 import {Icon} from 'react-native-elements'
 import {SuperGridSectionList} from 'react-native-super-grid';
 import geolib from 'geolib'
@@ -31,6 +31,19 @@ const DaysOfWeek = [
 ];
 
 class HomeScreen extends React.Component {
+
+    state = {
+        refreshing: false,
+        location: null,
+        planning: null
+    };
+
+    constructor(props) {
+        super(props);
+        this.navigate = props.navigation;
+        this.updateTitle("3 tasks remaining");
+        this.updateOperations();
+    }
 
     static navigationOptions = ({navigation}) => {
 
@@ -75,17 +88,19 @@ class HomeScreen extends React.Component {
 
     };
 
-    state = {
-        refreshing: false,
-        location: null,
-        planning: null
-    };
+    static logout(navigation) {
+        this.removeToken().then((value) => {
+            navigation.navigate("Login")
+        })
+    }
 
-    constructor(props) {
-        super(props);
-        this.navigate = props.navigation;
-        this.updateTitle("3 tasks remaining");
-        this.updateOperations();
+    static async removeToken() {
+        try {
+            await AsyncStorage.removeItem("token");
+            return true
+        } catch (error) {
+            console.log(error.message);
+        }
     }
 
     componentDidMount() {
@@ -161,22 +176,6 @@ class HomeScreen extends React.Component {
         this.setState({location});
     };
 
-
-    static logout(navigation) {
-        this.removeToken().then((value) => {
-            navigation.navigate("Login")
-        })
-    }
-
-    static async removeToken() {
-        try {
-            await AsyncStorage.removeItem("token");
-            return true
-        } catch (error) {
-            console.log(error.message);
-        }
-    }
-
     updateTitle(title) {
         this.props.navigation.setParams({
             HomeScreen: {
@@ -221,7 +220,7 @@ class HomeScreen extends React.Component {
     renderList() {
         let sortedArray = [];
 
-        const { planning } = this.state;
+        const {planning} = this.state;
         Object.keys(planning).map((date) => {
             const dayOperations = planning[date];
             const actualDay = new Date(date);
@@ -337,7 +336,11 @@ class HomeScreen extends React.Component {
                     style={styles.gridView}
                     renderItem={({item, section, index}) => (
                         <TouchableOpacity
-                            onPress={() => navigate('JobInformation', {job: item, name: 'dams', initialDate: section.title.substr(-10, 10)})}
+                            onPress={() => navigate('JobInformation', {
+                                job: item,
+                                name: 'dams',
+                                initialDate: section.title.substr(-10, 10)
+                            })}
                             style={[styles.itemContainer, {backgroundColor: item.color}]}>
                             <Text style={styles.itemName}>{item.place.name}</Text>
                             <Text style={styles.itemCode}>{item.place.description}</Text>
@@ -362,7 +365,7 @@ class HomeScreen extends React.Component {
 
     render() {
         const version = <Text style={{marginLeft: "auto", marginRight: "auto", fontSize: 12}}>{config().version}</Text>;
-        const { planning } = this.state;
+        const {planning} = this.state;
         if (planning) {
             const condition = Object.keys(planning).every((day) => planning[day].length === 0);
             if (!condition) {
