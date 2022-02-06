@@ -227,7 +227,8 @@ class HomeScreen extends React.Component {
             const filteredOperations = dayOperations.filter((operation) => !operation.done);
             if (filteredOperations.length > 0) {
                 let operations = filteredOperations.map((operation) => {
-                    Object.assign(operation, {color: "#2089dc"});
+                    const color = operation.template.color;
+                    Object.assign(operation, {color: color ? color : "#2089dc"});
                     return operation;
                 });
                 let item = {
@@ -343,7 +344,7 @@ class HomeScreen extends React.Component {
                             })}
                             style={[styles.itemContainer, {backgroundColor: item.color}]}>
                             <Text style={styles.itemName}>{item.place.name}</Text>
-                            <Text style={styles.itemCode}>{item.place.description}</Text>
+                            <Text style={styles.itemCode}>{item.template.name}</Text>
                             <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
                                 <Text style={styles.itemCode}>{this.getDistance(item.place.geoCoords)} km</Text>
                                 {item.done ?
