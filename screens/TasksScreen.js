@@ -4,7 +4,7 @@ import {
     View,
     TouchableOpacity,
     FlatList,
-    Alert, Text
+    Alert, Text, Platform
 } from 'react-native';
 import {Button, Icon} from 'react-native-elements'
 import TaskInputText from '../components/TaskInputText'
@@ -34,6 +34,9 @@ class TasksScreen extends React.Component {
         const {state} = navigation;
         return {
             title: 'Tasks',
+            headerStyle: {
+                marginTop: Platform.OS !== "android" ? 20 : 0
+            },
             headerLeft: (
                 <TouchableOpacity
                     onPress={() => this.goBack(navigation)}

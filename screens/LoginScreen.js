@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { StyleSheet, View , ImageBackground, AsyncStorage, Keyboard} from 'react-native';
+import {StyleSheet, View, ImageBackground, AsyncStorage, Keyboard, Platform} from 'react-native';
 import { Button, Input } from 'react-native-elements';
 import config from '../constants/environment'
 
@@ -9,6 +9,9 @@ import config from '../constants/environment'
 export default class LoginScreen extends React.Component {
     static navigationOptions = {
         header: null,
+        headerStyle: {
+            marginTop: Platform.OS !== "android" ? 20 : 0
+        },
     };
 
     constructor(props) {

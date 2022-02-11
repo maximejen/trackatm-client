@@ -1,8 +1,7 @@
 import Constants from "expo-constants";
-import { Platform } from 'react-native';
 //const localhost = Platform.OS === 'ios' ? 'http://localhost:4000/' : 'http://10.0.2.2:4000/';
 
-const version = "1.2.0";
+const version = "1.2.4";
 
 const ENV = {
     dev: {

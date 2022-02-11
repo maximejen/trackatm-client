@@ -1,0 +1,19 @@
+{
+  "cli": {
+    "version": ">= 0.34.0"
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "../android/339054228376-0681f5b981d3.json",
+        "track": "production",
+        "changesNotSentForReview": true
+      },
+      "ios": {
+        "appleId": "jenny.maxiime@hotmail.fr",
+        "ascAppId": "1462076637",
+        "appleTeamId": "B6RD5J5GR3"
+      }
+    }
+  }
+}

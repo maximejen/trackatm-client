@@ -32,6 +32,9 @@ const LinksStack = createStackNavigator({
 });
 
 LinksStack.navigationOptions = {
+  headerStyle: {
+    marginTop: Platform.OS !== "android" ? 20 : 0
+  },
   tabBarLabel: 'Links',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
@@ -46,6 +49,9 @@ const SettingsStack = createStackNavigator({
 });
 
 SettingsStack.navigationOptions = {
+  headerStyle: {
+    marginTop: Platform.OS !== "android" ? 20 : 0
+  },
   tabBarLabel: 'Settings',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
@@ -60,6 +66,9 @@ const LoginStack = createStackNavigator({
 });
 
 LoginStack.navigationOptions = {
+  headerStyle: {
+    marginTop: Platform.OS !== "android" ? 20 : 0
+  },
   tabBarLabel: 'Settings',
   tabBarIcon: ({ focused }) => (
       <TabBarIcon

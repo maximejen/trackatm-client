@@ -5,10 +5,10 @@ import {
     Text,
     TouchableOpacity,
     View,
-    RefreshControl, AsyncStorage, ScrollView
+    RefreshControl, AsyncStorage, ScrollView, SafeAreaView
 } from 'react-native';
 import {withNavigation} from "react-navigation"
-import {Updates} from 'expo';
+import * as Updates from "expo-updates";
 import * as Permissions from 'expo-permissions';
 import * as Location from 'expo-location';
 import * as ScreenOrientation from 'expo-screen-orientation'
@@ -50,8 +50,11 @@ class HomeScreen extends React.Component {
         const {state} = navigation;
         return {
             title: 'List of jobs',
+            headerStyle: {
+                marginTop: Platform.OS !== "android" ? 20 : 0
+            },
             headerLeft: <TouchableOpacity
-                onPress={() => Updates.reload()}
+                onPress={async () => await Updates.reloadAsync()}
                 style={{
                     height: 45,
                     width: 45,
@@ -112,6 +115,17 @@ class HomeScreen extends React.Component {
                 this.props.navigation.state.params.done = false;
             }
         });
+
+        const {setParams} = this.props.navigation;
+        if (Platform.OS === 'ios')
+            this._getLocationAsync();
+        // if (Platform.OS === 'android' && !Constants.isDevice) {
+        //     this.setState({
+        //         errorMessage: 'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
+        //     });
+        // } else {
+        //
+        // }
     }
 
     fromFlatToTree(operations) {
@@ -152,17 +166,6 @@ class HomeScreen extends React.Component {
                 console.log(err)
             })
     };
-
-    componentWillMount() {
-        const {setParams} = this.props.navigation;
-        if (Platform.OS === 'android' && !Constants.isDevice) {
-            this.setState({
-                errorMessage: 'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
-            });
-        } else {
-            this._getLocationAsync();
-        }
-    }
 
     _getLocationAsync = async () => {
         let {status} = await Permissions.askAsync(Permissions.LOCATION);
@@ -346,7 +349,7 @@ class HomeScreen extends React.Component {
                             <Text style={styles.itemName}>{item.place.name}</Text>
                             <Text style={styles.itemCode}>{item.template.name}</Text>
                             <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
-                                <Text style={styles.itemCode}>{this.getDistance(item.place.geoCoords)} km</Text>
+                                {Platform.OS === 'ios' ? <Text style={styles.itemCode}>{this.getDistance(item.place.geoCoords)} km</Text> : null}
                                 {item.done ?
                                     <Icon
                                         name='check'
@@ -391,7 +394,7 @@ class HomeScreen extends React.Component {
 
         } else {
             return (
-                <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+                <SafeAreaView style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
 
                     <View style={styles.imageWrapper}>
                         <LottieView
@@ -405,7 +408,7 @@ class HomeScreen extends React.Component {
                     </View>
                     {version}
 
-                </View>
+                </SafeAreaView>
             )
         }
 
