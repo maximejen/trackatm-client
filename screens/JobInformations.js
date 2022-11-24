@@ -57,9 +57,9 @@ export default class JobInformations extends React.Component {
 
   _handleOpenWithLinking = () => {
     if (Platform.OS === 'ios') {
-      Linking.openURL('maps://?q=' + this.state.job.lat + ',' + this.state.job.long);
+      Linking.openURL(`maps:0,0?q=${this.state.job.place.customer.name} - ${this.state.job.place.name}@${this.state.job.place.geoCoords.lat},${this.state.job.place.geoCoords.lon}`);
     } else {
-      Linking.openURL('geo:' + +this.state.job.lat + ',' + this.state.job.long);
+      Linking.openURL('geo:' + +this.state.job.geoCoords.lat + ',' + this.state.job.geoCoords.lon);
     }
   };
 

@@ -1,11 +1,12 @@
 import React from 'react';
-import {View, TouchableOpacity, Text} from 'react-native';
+import {View, TouchableOpacity, Text, Dimensions} from 'react-native';
 import {Camera} from 'expo-camera';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as ScreenOrientation from 'expo-screen-orientation'
 import {Icon} from "react-native-elements";
 import DropdownAlert from 'react-native-dropdownalert';
 import {withNavigation} from "react-navigation";
+import {OrientationLock} from "expo-screen-orientation/src/ScreenOrientation.types";
 
 
 class TaskCamera extends React.Component {
@@ -21,7 +22,10 @@ class TaskCamera extends React.Component {
 
   constructor(props) {
     super(props);
-    ScreenOrientation.lockAsync(ScreenOrientation.Orientation.PORTRAIT_UP).then(() => {});
+    ScreenOrientation.lockAsync(OrientationLock.PORTRAIT_UP).then(() => {
+    });
+
+    this.snapPhoto = this.snapPhoto.bind(this);
   }
 
   async componentDidMount() {
@@ -30,18 +34,35 @@ class TaskCamera extends React.Component {
   }
 
   async snapPhoto() {
-    if (this.camera && this.state.cameraReady) {
-      const options = {
-        quality: 0, base64: true, fixOrientation: true,
-        exif: true
-      };
-      await this.camera.takePictureAsync(options).then(async photo => {
-        const manipResult = await ImageManipulator.manipulateAsync(
-          photo.localUri || photo.uri,
-          [{resize: {width: 300}}],
-          {compress: 0.9}
-        );
-        this.props.navigation.state.params.setPicture(manipResult);
+    if (this.camera) {
+      ScreenOrientation.lockAsync(OrientationLock.PORTRAIT_UP).then(async () => {
+        const options = {
+          quality: 0,
+          base64: true,
+          fixOrientation: true,
+          skipProcessing: true,
+          exif: true
+        };
+        this.camera.takePictureAsync(options)
+          .then(async photo => {
+            let manipResult = await ImageManipulator.manipulateAsync(
+              photo.localUri || photo.uri,
+              [{resize: {width: 300}}],
+              {compress: 0.9}
+            );
+            // Check the picture is in landscape and rotate it back to portrait if needed.
+            if (manipResult.width > manipResult.height) {
+              manipResult = await ImageManipulator.manipulate(
+                manipResult.uri,
+                [{rotate: -90}, {resize: {width: 300}}],
+                {}
+              );
+            }
+            this.props.navigation.state.params.setPicture(manipResult);
+          })
+          .catch(err => {
+            this.dropdown.alertWithType('error', 'Error taking the picture', err);
+          });
       });
     }
   }
@@ -66,9 +87,11 @@ class TaskCamera extends React.Component {
             ref={ref => {
               this.camera = ref;
             }}
+            ratio={"4:3"}
             type={this.state.type}
             flashMode={this.state.flashOn ? Camera.Constants.FlashMode.torch : Camera.Constants.FlashMode.off}
             onCameraReady={() => {
+              console.log("Camera READY")
               this.setState({
                 cameraReady: true
               });
@@ -93,9 +116,10 @@ class TaskCamera extends React.Component {
               >
                 <TouchableOpacity
                   style={{
-                    width: "33%"
+                    width: Dimensions.get("window").width * 0.33
                   }}
                   onPress={() => this.props.navigation.goBack()}
+                  activeOpacity={0.9}
                 >
                   <Icon
                     style={{justifyContent: "flex-start"}}
@@ -107,9 +131,14 @@ class TaskCamera extends React.Component {
 
                 <TouchableOpacity
                   style={{
-                    width: "33%"
+                    width: Dimensions.get("window").width * 0.33
                   }}
-                  onPress={this.snapPhoto.bind(this)}>
+                  activeOpacity={0.9}
+                  onPress={() => {
+                    console.log("snapPhoto !");
+                    this.snapPhoto();
+                  }}
+                >
                   <Icon
                     name='adjust'
                     color="#ffffff"
@@ -119,9 +148,11 @@ class TaskCamera extends React.Component {
 
                 <TouchableOpacity
                   style={{
-                    width: "33%"
+                    width: Dimensions.get("window").width * 0.33
                   }}
-                  onPress={this.handleFlash.bind(this)}>
+                  activeOpacity={0.9}
+                  onPress={this.handleFlash.bind(this)}
+                >
                   <Icon
                     style={{justifyContent: "flex-end"}}
                     name={this.state.flashOn ? 'flash-on' : 'flash-off'}
@@ -133,9 +164,6 @@ class TaskCamera extends React.Component {
               </View>
 
             </View>
-            <TouchableOpacity style={{}} onPress={this.snapPhoto.bind(this)}>
-
-            </TouchableOpacity>
           </Camera>
 
         </View>

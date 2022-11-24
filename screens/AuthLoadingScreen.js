@@ -1,7 +1,7 @@
 import React from 'react';
 import {
     ActivityIndicator,
-    AsyncStorage, ImageBackground,
+    AsyncStorage, ImageBackground, Platform,
     StatusBar,
     StyleSheet,
     View,
@@ -26,7 +26,7 @@ class AuthLoadingScreen extends React.Component {
             this.props.navigation.navigate('Login');
             return
         }
-        let url = config().apiUrl + '/api/upload-app-version?version=' + config().version;
+        let url = config().apiUrl + '/api/upload-app-version?version=' + `${config().version} (${Platform.OS})`;
         fetch(url, {
             method: 'GET',
             headers: {

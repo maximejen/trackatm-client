@@ -19,6 +19,7 @@ import {SuperGridSectionList} from 'react-native-super-grid';
 import geolib from 'geolib'
 import config from "../constants/environment";
 import DropdownAlert from "react-native-dropdownalert";
+import {OrientationLock} from "expo-screen-orientation/src/ScreenOrientation.types";
 
 const DaysOfWeek = [
     "Sunday",
@@ -323,7 +324,7 @@ class HomeScreen extends React.Component {
         // });
 
         const {navigate} = this.props.navigation;
-        ScreenOrientation.lockAsync(ScreenOrientation.Orientation.PORTRAIT_UP);
+        ScreenOrientation.lockAsync(OrientationLock.PORTRAIT_UP).then(() => {});
         return (
             <ScrollView>
                 <SuperGridSectionList

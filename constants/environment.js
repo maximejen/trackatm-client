@@ -1,10 +1,11 @@
 import Constants from "expo-constants";
 //const localhost = Platform.OS === 'ios' ? 'http://localhost:4000/' : 'http://10.0.2.2:4000/';
 
-const version = "1.2.4";
+const version = "1.2.8";
 
 const ENV = {
     dev: {
+        // apiUrl: "http://localhost:8001",
         apiUrl: "https://track-atm.com",
         version: version
     },
