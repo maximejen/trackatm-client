@@ -5,7 +5,7 @@
   "submit": {
     "production": {
       "android": {
-        "serviceAccountKeyPath": "../android/339054228376-0681f5b981d3.json",
+        "serviceAccountKeyPath": "../android/api-5861799739827883487-610859-6bb5f95a8f0f",
         "track": "production",
         "changesNotSentForReview": true
       },
@@ -13,6 +13,18 @@
         "appleId": "jenny.maxiime@hotmail.fr",
         "ascAppId": "1462076637",
         "appleTeamId": "B6RD5J5GR3"
+      }
+    }
+  },
+  "build": {
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "android": {
+
       }
     }
   }

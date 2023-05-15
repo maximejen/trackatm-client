@@ -34,10 +34,18 @@
     },
     "android": {
       "package": "com.holdco.holdco",
-      "versionCode": 7,
+      "versionCode": 8,
       "permissions": [
         "CAMERA"
+      ],
+      "blockedPermissions": [
+        "android.permission.REQUEST_INSTALL_PACKAGES"
       ]
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8750dad0-6856-11e9-96f8-934fb79d3239"
+      }
     }
   }
 }
