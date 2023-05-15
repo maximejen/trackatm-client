@@ -1,77 +1,80 @@
-import React from 'react';
+import React from "react";
 import {
-    ActivityIndicator,
-    AsyncStorage, ImageBackground, Platform,
-    StatusBar,
-    StyleSheet,
-    View,
-} from 'react-native';
+  ActivityIndicator,
+  ImageBackground,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  View,
+} from "react-native";
 import config from "../constants/environment";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 class AuthLoadingScreen extends React.Component {
-    static navigationOptions = {
-        header: null
-    };
-    constructor(props) {
-        super(props);
-        this._bootstrapAsync();
+  static navigationOptions = {
+    header: null,
+  };
+  constructor(props) {
+    super(props);
+    this._bootstrapAsync();
+  }
+
+  _bootstrapAsync = async () => {
+    const userToken = await AsyncStorage.getItem("token");
+    const cleanerId = await AsyncStorage.getItem("cleanerid");
+    const { navigate } = this.props.navigation;
+
+    if (!userToken || !cleanerId) {
+      this.props.navigation.navigate("Login");
+      return;
     }
+    let url =
+      config().apiUrl +
+      "/api/upload-app-version?version=" +
+      `${config().version} (${Platform.OS})`;
+    fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "multipart/form-data",
+        token: userToken,
+      },
+    });
+    url = config().apiUrl + "/api/token?token=" + userToken;
+    fetch(url)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        navigate(responseJson.success ? "Home" : "Login");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
 
-    _bootstrapAsync = async () => {
-        const userToken = await AsyncStorage.getItem('token');
-        const cleanerId = await AsyncStorage.getItem('cleanerid');
-        const {navigate} = this.props.navigation;
-
-        if (!userToken || !cleanerId) {
-            this.props.navigation.navigate('Login');
-            return
-        }
-        let url = config().apiUrl + '/api/upload-app-version?version=' + `${config().version} (${Platform.OS})`;
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'multipart/form-data',
-                'token': userToken
-            }});
-        url = config().apiUrl + '/api/token?token=' + userToken;
-        fetch(url)
-            .then((response) => response.json())
-            .then((responseJson) => {
-                navigate(responseJson.success ? 'Home' : 'Login');
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-
-    };
-
-    render() {
-        return (
-            <ImageBackground
-                source={require('../assets/images/login-background.jpg')}
-                style={{
-                    flex: 1,
-                }}
-            >
-                <View style={styles.content}>
-                    <ActivityIndicator size="large"
-                                       color="white"
-                    />
-                    <StatusBar barStyle="default" />
-                </View>
-            </ImageBackground>
-        );
-    }
+  render() {
+    return (
+      <ImageBackground
+        source={require("../assets/images/login-background.jpg")}
+        style={{
+          flex: 1,
+        }}
+      >
+        <View style={styles.content}>
+          <ActivityIndicator size="large" color="white" />
+          <StatusBar barStyle="default" />
+        </View>
+      </ImageBackground>
+    );
+  }
 }
 
-export default AuthLoadingScreen
+export default AuthLoadingScreen;
 const styles = StyleSheet.create({
-    content: {
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
+  content: {
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });

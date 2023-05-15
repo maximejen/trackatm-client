@@ -1,7 +1,7 @@
 import Constants from "expo-constants";
 //const localhost = Platform.OS === 'ios' ? 'http://localhost:4000/' : 'http://10.0.2.2:4000/';
 
-const version = "1.2.8";
+const version = "1.2.9";
 
 const ENV = {
     dev: {

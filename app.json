@@ -34,7 +34,7 @@
     },
     "android": {
       "package": "com.holdco.holdco",
-      "versionCode": 8,
+      "versionCode": 9,
       "permissions": [
         "CAMERA"
       ],
