@@ -12,7 +12,6 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { withNavigation } from "react-navigation";
 import * as Updates from "expo-updates";
-import * as Permissions from "expo-permissions";
 import * as Location from "expo-location";
 import * as ScreenOrientation from "expo-screen-orientation";
 import LottieView from "lottie-react-native";
@@ -170,7 +169,7 @@ class HomeScreen extends React.Component {
   }
 
   _getLocationAsync = async () => {
-    let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
       this.setState({
         errorMessage: "Permission to access location was denied",

@@ -32,6 +32,15 @@
         "NSLocationWhenInUseUsageDescription": "Will ask you that to calculate distance between ATM and you."
       }
     },
+    "plugins": [
+      "./android-manifest.plugin.js",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to calculate the distance between the ATM and you."
+        }
+      ]
+    ],
     "android": {
       "package": "com.holdco.holdco",
       "versionCode": 9,
