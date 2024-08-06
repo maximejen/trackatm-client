@@ -37,7 +37,7 @@ class TasksScreen extends React.Component {
     return {
       title: "Tasks",
       headerStyle: {
-        marginTop: Platform.OS !== "android" ? 20 : 0,
+        marginTop: Platform.OS !== "android" ? 20 : undefined,
       },
       headerLeft: (
         <TouchableOpacity

@@ -15,7 +15,7 @@ export default class LoginScreen extends React.Component {
   static navigationOptions = {
     header: null,
     headerStyle: {
-      marginTop: Platform.OS !== "android" ? 20 : 0,
+      marginTop: Platform.OS !== "android" ? 20 : undefined,
     },
   };
 

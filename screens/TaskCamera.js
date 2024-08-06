@@ -1,7 +1,7 @@
 import React from "react";
-import {Camera, CameraView, useCameraPermissions} from "expo-camera";
-import { Dimensions, TouchableOpacity, View } from "react-native";
-import DropdownAlert from "react-native-dropdownalert";
+import { CameraView, useCameraPermissions} from "expo-camera";
+import { Dimensions, TouchableOpacity, View, Text } from "react-native";
+import DropdownAlert, { DropdownAlertType} from "react-native-dropdownalert";
 import { Icon } from "react-native-elements";
 import { withNavigation } from "react-navigation";
 import * as ScreenOrientation from "expo-screen-orientation";
@@ -15,12 +15,9 @@ const TaskCamera = ({ navigation, ...props }) => {
   const [cameraReady, setCameraReady] = React.useState(false);
 
   const cameraRef = React.useRef(null);
-  const dropdownRef = React.useRef(null);
 
   React.useEffect(() => {
-    ScreenOrientation.lockAsync(2).then(data => {
-      console.log(data);
-    });
+    ScreenOrientation.lockAsync(2);
   }, []);
 
   const [status, requestPermission] = useCameraPermissions();
@@ -35,6 +32,9 @@ const TaskCamera = ({ navigation, ...props }) => {
       setHasCameraPermission(status.status);
     }
   }, [status]);
+
+  let alert = (_data) => new Promise(res => res);
+
 
   const snapPhoto = () => {
     if (cameraRef.current) {
@@ -67,11 +67,13 @@ const TaskCamera = ({ navigation, ...props }) => {
             })
             .catch((err) => {
               console.log(err);
-              dropdownRef.current.alertWithType(
-                "error",
-                "Error taking the picture",
-                err
-              );
+              alert({
+                type: DropdownAlertType.Error,
+                title: 'Error',
+                message: 'Error taking the picture',
+              }).then(data => {
+                console.log(data);
+              });
             });
         }
       );
@@ -80,30 +82,27 @@ const TaskCamera = ({ navigation, ...props }) => {
 
   if (hasCameraPermission === null) {
     return <View />;
-  } else if (hasCameraPermission === false) {
+  } else if (hasCameraPermission !== "granted") {
     return <Text>No access to camera</Text>;
   } else {
     return (
       <View style={{ flex: 1 }}>
         <CameraView
-          facing={"back"}
-          flash={flashOn ? "on" : "off"}
+          // facing={"back"}
+          // flash={flashOn ? "on" : "off"}
           mode={"picture"}
           style={{ flex: 1 }}
           ref={(ref) => {
             if (ref) cameraRef.current = ref;
           }}
-          pictureSize={"4:3"}
+          // pictureSize={"4:3"}
+          enableTorch={flashOn}
           onCameraReady={() => {
             console.log("Camera READY");
             setCameraReady(true);
           }}
         >
-          <DropdownAlert
-            ref={(ref) => {
-              if (ref) dropdownRef.current = ref;
-            }}
-          />
+          <DropdownAlert alert={func => (alert = func)} />
           <View
             style={{
               flex: 1,
@@ -141,8 +140,8 @@ const TaskCamera = ({ navigation, ...props }) => {
                 }}
                 activeOpacity={0.9}
                 onPress={() => {
-                  console.log("snapPhoto !");
-                  snapPhoto();
+                  if (cameraReady)
+                    snapPhoto();
                 }}
               >
                 <Icon name="adjust" color="#ffffff" size={60} />

@@ -10,7 +10,7 @@ export default class JobInformations extends React.Component {
   static navigationOptions = {
     title: "",
     headerStyle: {
-      marginTop: Platform.OS !== "android" ? 20 : 0,
+      marginTop: Platform.OS !== "android" ? 20 : undefined,
     },
   };
 

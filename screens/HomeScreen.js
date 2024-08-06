@@ -51,7 +51,7 @@ class HomeScreen extends React.Component {
     return {
       title: "List of jobs",
       headerStyle: {
-        marginTop: Platform.OS !== "android" ? 20 : 0,
+        marginTop: Platform.OS !== "android" ? 20 : undefined,
       },
       headerLeft: (
         <TouchableOpacity
