@@ -3,11 +3,11 @@
     "name": "TrackATM",
     "description": "Application for holdco. This application allow cleaner to see his next job and to complete tasks",
     "slug": "holdco",
-    "privacy": "public",
     "platforms": [
       "ios",
       "android"
     ],
+    "newArchEnabled": true,
     "version": "3.4.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

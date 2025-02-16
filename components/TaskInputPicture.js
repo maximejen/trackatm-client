@@ -13,7 +13,6 @@ import {
 import { material } from "react-native-typography";
 import { Tooltip, Icon } from "react-native-elements";
 import ImageView from "react-native-image-viewing";
-import { withNavigation } from "react-navigation";
 
 class TaskInputPicture extends React.Component {
   constructor(props) {
@@ -80,24 +79,24 @@ class TaskInputPicture extends React.Component {
           style={{ paddingRight: 10 }}
           onPress={() => this.toogleViewer(index)}
         >
-          <ImageBackground
-            source={{ uri: item.source.uri }}
+          {/*<ImageBackground*/}
+          {/*  source={{ uri: item.source.uri }}*/}
+          {/*  style={{*/}
+          {/*    width: 100,*/}
+          {/*    height: 95,*/}
+          {/*    borderRadius: 4,*/}
+          {/*  }}*/}
+          {/*>*/}
+          <TouchableOpacity
+            onPress={() => this.deleteImage(index)}
             style={{
-              width: 100,
-              height: 95,
-              borderRadius: 4,
+              position: "absolute",
+              bottom: 0,
             }}
           >
-            <TouchableOpacity
-              onPress={() => this.deleteImage(index)}
-              style={{
-                position: "absolute",
-                bottom: 0,
-              }}
-            >
-              <Icon name="clear" size={30} color="#ff0000" />
-            </TouchableOpacity>
-          </ImageBackground>
+            <Icon name="clear" size={30} color="#ff0000" />
+          </TouchableOpacity>
+          {/*</ImageBackground>*/}
         </TouchableOpacity>
       </View>
     );

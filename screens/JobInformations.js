@@ -1,176 +1,115 @@
 import React from "react";
-import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import * as Linking from "expo-linking";
 import { Button } from "react-native-elements";
-import { heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { DropdownAlertType } from "react-native-dropdownalert";
+import { useAlertContext } from "../components/AlertContext";
+import { useNavigation } from "@react-navigation/native";
+import { calcHeight, calcWidth } from "../utils/deviceResponsiveHelper";
 
-export default class JobInformations extends React.Component {
-  static navigationOptions = {
-    title: "",
-    headerStyle: {
-      marginTop: Platform.OS !== "android" ? 20 : undefined,
-    },
-  };
+const JobInformation = ({ route }) => {
+  const navigation = useNavigation();
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      job: {
-        ...this.props.navigation.state.params.job,
-        initialDate: this.props.navigation.state.params.initialDate,
-      },
-    };
-    this.updateTitle(this.state.job.place.name);
-  }
+  const [placeLocation, setPlaceLocation] = React.useState(null);
 
-  componentDidMount() {
-    if (Platform.OS === "ios")
-      this._getLocationAsync(this.state.job.place.geoCoords);
-  }
+  const { alert } = useAlertContext();
 
-  _getLocationAsync = async (coords) => {
-    let locationDetail = await Location.reverseGeocodeAsync({
-      latitude: coords.lat,
-      longitude: coords.lon,
-    });
-    console.log(locationDetail);
-    this.setState({
-      location: locationDetail[0],
-    });
-  };
+  const { job, initialDate } = route.params;
 
-  updateTitle(title) {
-    this.props.navigation.setParams({
-      JobInformation: {
-        title: title,
-      },
-    });
-    JobInformations.navigationOptions.title = title;
-  }
-
-  _handleOpenWithLinking = () => {
-    // if (Platform.OS === "ios") {
-      // const url = `https://maps.apple.com/?ll=${this.state.job.place.geoCoords.lat},${this.state.job.place.geoCoords.lon}&q=${this.state.job.place.customer.name} - ${this.state.job.place.name}`;
-      const url = `https://www.google.com/maps/search/?api=1&query=${this.state.job.place.geoCoords.lat}%2C${this.state.job.place.geoCoords.lon}`;
-      Linking.openURL(url).catch((e) => {
-        console.error(e);
-      });
-    // } else {
-    //   Linking.openURL(
-    //     "geo:" +
-    //       +this.state.job.geoCoords.lat +
-    //       "," +
-    //       this.state.job.geoCoords.lon
-    //   );
-    // }
-  };
-
-  renderButtonTasks() {
-    const { navigate } = this.props.navigation;
-    if (!this.state.job.done) {
-      return (
-        <View style={styles.buttonOpenMap}>
-          <Button
-            title="Complete tasks"
-            type="solid"
-            onPress={() =>
-              navigate("Tasks", {
-                tasks: this.state.job.template.tasks,
-                job: this.state.job,
-              })
-            }
-          />
-        </View>
-      );
+  React.useEffect(() => {
+    if (job) {
+      navigation.setOptions({ title: job.place.name, headerShown: true });
+      Location.reverseGeocodeAsync({
+        latitude: job.place.geoCoords.lat,
+        longitude: job.place.geoCoords.lon,
+      })
+        .then((locationDetail) => {
+          setPlaceLocation(locationDetail[0]);
+        })
+        .catch((error) => {
+          alert({
+            type: DropdownAlertType.Error,
+            message: "Could not retrieve location",
+          });
+        });
     }
-  }
+  }, [job]);
 
-  renderAddress() {
-    if (this.state.location) {
-      return (
-        <View>
-          <Text style={styles.textTitle}>location address</Text>
-          <Text style={styles.textData}>
-            {this.state.location.street},{this.state.location.city},{" "}
-            {this.state.location.postalCode}
-          </Text>
-        </View>
-      );
-    } else
-      return (
-        <View>
-          <Text style={styles.textTitle}>location address</Text>
-        </View>
-      );
-  }
-
-  renderBorderLine() {
-    return (
-      <View style={{ margin: "3%" }}>
-        <View
-          style={{
-            borderBottomColor: "#4158d6",
-            borderBottomWidth: 1,
+  return (
+    <View style={{ flex: 1 }}>
+      <ScrollView>
+        <MapView
+          style={styles.map}
+          initialRegion={{
+            latitude: job.place.geoCoords.lat,
+            longitude: job.place.geoCoords.lon,
+            latitudeDelta: 0.005,
+            longitudeDelta: 0.005,
           }}
-        />
-      </View>
-    );
-  }
-
-  render() {
-    console.log(this.state.job);
-    return (
-      <View style={{ flex: 1 }}>
-        <ScrollView>
-          {Platform.OS === "ios" && (
-            <MapView
-              style={styles.map}
-              initialRegion={{
-                latitude: this.state.job.place.geoCoords.lat,
-                longitude: this.state.job.place.geoCoords.lon,
-                latitudeDelta: 0.005,
-                longitudeDelta: 0.005,
+          showsUserLocation={true}
+        >
+          <Marker
+            coordinate={{
+              latitude: job.place.geoCoords.lat,
+              longitude: job.place.geoCoords.lon,
+            }}
+            title={job.place.customer.name}
+            description={job.place.name}
+          />
+        </MapView>
+        <View style={{ flex: 1, position: "relative", height: "70%" }}>
+          <View style={styles.buttonOpenMap}>
+            <Button
+              title="Open with maps"
+              type="solid"
+              onPress={() => {
+                const url = `https://www.google.com/maps/search/?api=1&query=${job.place.geoCoords.lat}%2C${job.place.geoCoords.lon}`;
+                Linking.openURL(url).catch((e) => {
+                  console.error(e);
+                });
               }}
-            >
-              <Marker
-                coordinate={{
-                  latitude: this.state.job.place.geoCoords.lat,
-                  longitude: this.state.job.place.geoCoords.lon,
-                }}
-                title={this.state.job.bank_name}
-                description={this.state.job.atm_name}
-              />
-            </MapView>
-          )}
-          <View style={{ flex: 1, position: "relative", height: hp("70%") }}>
-            <View style={styles.buttonOpenMap}>
-              <Button
-                title="Open with maps"
-                type="solid"
-                onPress={this._handleOpenWithLinking}
-              />
-            </View>
-            <View>
-              {Platform.OS === "ios" && this.renderAddress()}
-              {this.renderBorderLine()}
-              <Text style={styles.textTitle}>Customer</Text>
-              <Text style={styles.textData}>
-                {this.state.job.place.customer.name}
-              </Text>
-              {this.renderBorderLine()}
-              <Text style={styles.textTitle}>Location name</Text>
-              <Text style={styles.textData}>{this.state.job.place.name}</Text>
-              {this.renderBorderLine()}
-              {this.renderButtonTasks()}
-            </View>
+            />
           </View>
-        </ScrollView>
-      </View>
-    );
-  }
-}
+          <View>
+            <View>
+              <Text style={styles.textTitle}>location address</Text>
+              {placeLocation && (
+                <Text style={styles.textData}>
+                  {`${placeLocation.streetNumber} ${placeLocation.street}, \n${placeLocation.postalCode} ${placeLocation.city}`}
+                </Text>
+              )}
+            </View>
+            <Divider />
+            <Text style={styles.textTitle}>Customer</Text>
+            <Text style={styles.textData}>{job.place.customer.name}</Text>
+            <Divider />
+            <Text style={styles.textTitle}>Location name</Text>
+            <Text style={styles.textData}>{job.place.name}</Text>
+            <Divider />
+            {!job.done && (
+              <View style={styles.buttonOpenMap}>
+                <Button
+                  title="Complete tasks"
+                  type="solid"
+                  onPress={() =>
+                    navigation.navigate("Tasks", {
+                      tasks: job.template.tasks,
+                      job: { ...job, initialDate },
+                    })
+                  }
+                />
+              </View>
+            )}
+          </View>
+        </View>
+      </ScrollView>
+    </View>
+  );
+};
+
+export default JobInformation;
 
 var styles = StyleSheet.create({
   textTitle: {
@@ -183,15 +122,15 @@ var styles = StyleSheet.create({
   textData: {
     fontSize: 16,
     paddingLeft: "3%",
-    paddingRight: "3%",
+    paddingRight: "5%",
   },
   textAddress: {
     width: "100%",
-    height: hp("3%"),
+    height: calcWidth(3),
     paddingLeft: "2%",
   },
   buttonOpenMap: {
-    paddingTop: hp("1%"),
+    paddingTop: calcWidth(1),
     marginLeft: "3%",
     marginRight: "3%",
   },
@@ -209,11 +148,24 @@ var styles = StyleSheet.create({
     marginBottom: 5,
     shadowRadius: 1,
     shadowOffset: { height: 2, width: 0 },
-    height: hp("35%"),
-    width: "95%",
+    height: calcHeight(35),
+    width: calcWidth(95),
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
   },
 });
+
+const Divider = () => {
+  return (
+    <View style={{ margin: "3%" }}>
+      <View
+        style={{
+          borderBottomColor: "#4158d6",
+          borderBottomWidth: 1,
+        }}
+      />
+    </View>
+  );
+};

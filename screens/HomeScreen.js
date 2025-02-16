@@ -5,438 +5,191 @@ import {
   Text,
   TouchableOpacity,
   View,
-  RefreshControl,
-  ScrollView,
   SafeAreaView,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { withNavigation } from "react-navigation";
 import * as Updates from "expo-updates";
-import * as Location from "expo-location";
 import * as ScreenOrientation from "expo-screen-orientation";
 import LottieView from "lottie-react-native";
 import { Icon } from "react-native-elements";
-import { SuperGridSectionList } from "react-native-super-grid";
 import config from "../constants/environment";
-import DropdownAlert from "react-native-dropdownalert";
+import { DropdownAlertType } from "react-native-dropdownalert";
 import { OrientationLock } from "expo-screen-orientation/src/ScreenOrientation.types";
-import * as geolib from "geolib";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import HomePlanningList from "../components/HomePlanningList";
+import { useAlertContext } from "../components/AlertContext";
+import useLocation from "../hooks/useLocation";
 
-const DaysOfWeek = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
+export const ShowVersion = (props) => {
+  return (
+    <Text
+      {...props}
+      style={{
+        marginLeft: "auto",
+        marginRight: "auto",
+        fontSize: 12,
+        ...props.style,
+      }}
+    >
+      {config().version}
+    </Text>
+  );
+};
 
-class HomeScreen extends React.Component {
-  state = {
-    refreshing: false,
-    location: null,
-    planning: null,
-  };
+const HomeScreen = () => {
+  const animationRef = React.useRef(null);
+  const { navigate, setOptions, addListener } = useNavigation();
 
-  constructor(props) {
-    super(props);
-    this.navigate = props.navigation;
-    this.updateTitle("3 tasks remaining");
-    this.updateOperations();
-  }
+  const { alert } = useAlertContext();
+  const [location, getDistance, updateLocation] = useLocation();
 
-  static navigationOptions = ({ navigation }) => {
-    const { state } = navigation;
-    return {
+  React.useEffect(() => {
+    const unsubscribe = addListener("focus", () => {
+      updateLocation();
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  const logout = React.useCallback(() => {
+    alert?.({
+      type: DropdownAlertType.Success,
+      message: "Logout",
+    });
+    // try {
+    //   return AsyncStorage.removeItem("token").then(() => {
+    //     navigate("Login");
+    //   });
+    // } catch (error) {
+    //   console.log(error.message);
+    // }
+  }, [navigate]);
+
+  // set Header of the page
+  React.useEffect(() => {
+    setOptions({
       title: "List of jobs",
-      headerStyle: {
-        marginTop: Platform.OS !== "android" ? 20 : undefined,
-      },
-      headerLeft: (
-        <TouchableOpacity
-          onPress={async () => await Updates.reloadAsync()}
-          style={{
-            height: 45,
-            width: 45,
-            alignItems: "center",
-            justifyContent: "center",
-            margin: 10,
-          }}
-        >
-          <Icon name="refresh-ccw" type="feather" />
-        </TouchableOpacity>
-      ),
-      headerRight: (
-        <TouchableOpacity
-          onPress={() => this.logout(navigation)}
-          style={{
-            height: 45,
-            width: 45,
-            alignItems: "center",
-            justifyContent: "center",
-            margin: 10,
-          }}
-        >
-          <Icon name="log-out" type="feather" />
-        </TouchableOpacity>
-      ),
-    };
-  };
-
-  static logout(navigation) {
-    this.removeToken().then((value) => {
-      navigation.navigate("Login");
-    });
-  }
-
-  static async removeToken() {
-    try {
-      await AsyncStorage.removeItem("token");
-      return true;
-    } catch (error) {
-      console.log(error.message);
-    }
-  }
-
-  componentDidMount() {
-    this.animation.play();
-    this.focusListener = this.props.navigation.addListener("didFocus", () => {
-      if (this.props.navigation.state.params.done) {
-        this.dropdown.alertWithType("success", "Operation has been saved", "");
-        this.updateOperations();
-        this.props.navigation.state.params.done = false;
-      }
-    });
-
-    const { setParams } = this.props.navigation;
-    if (Platform.OS === "ios") this._getLocationAsync();
-    // if (Platform.OS === 'android' && !Constants.isDevice) {
-    //     this.setState({
-    //         errorMessage: 'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
-    //     });
-    // } else {
-    //
-    // }
-  }
-
-  fromFlatToTree(operations) {
-    let tree = {
-      Monday: [],
-      Tuesday: [],
-      Wednesday: [],
-      Thursday: [],
-      Friday: [],
-      Saturday: [],
-      Sunday: [],
-    };
-    operations.map((operation) => {
-      tree[operation.day].push(operation);
-    });
-    return tree;
-  }
-
-  fromTreeToFlat(tree) {
-    let flat = [];
-    Object.Keys(tree).map((day) => {
-      tree[day].map((operation) => {
-        flat.push(operation);
-      });
-    });
-    return flat;
-  }
-
-  async updateOperations() {
-    const userToken = await AsyncStorage.getItem("token");
-    fetch(config().apiUrl + "/api/cleaner/operations/?flat=false", {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        token: userToken,
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        // const planning = this.fromFlatToTree(responseJson);
-        // this.setState({planning});
-        this.setState({ planning: responseJson });
-        // this.setColor([...responseJson]);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-
-  _getLocationAsync = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      this.setState({
-        errorMessage: "Permission to access location was denied",
-      });
-    }
-
-    let location = await Location.getCurrentPositionAsync({});
-    this.setState({ location });
-  };
-
-  updateTitle(title) {
-    this.props.navigation.setParams({
-      HomeScreen: {
-        title: title,
-      },
-    });
-    HomeScreen.navigationOptions.title = title;
-  }
-
-  _onRefresh = () => {
-    this.setState({ refreshing: true });
-    this.updateOperations().then(this.setState({ refreshing: false }));
-  };
-
-  getDistance(coords) {
-    if (!this.state.location || !coords) return;
-    return geolib.convertDistance(
-      geolib.getDistance(
-        { latitude: coords.lat, longitude: coords.lon },
-        {
-          latitude: this.state.location.coords.latitude,
-          longitude: this.state.location.coords.longitude,
-        }
-      ),
-      "km"
-    );
-  }
-
-  setColor(array) {
-    let color = ["#2089dc", "#2089dc"];
-
-    let newData = [];
-    for (let i = 0; i < array.length; i++) {
-      if (array[i].done) Object.assign(array[i], { color: "#1dd131" });
-      else
-        Object.assign(array[i], {
-          color: color[Math.floor(Math.random() * color.length)],
-        });
-      newData.push(array[i]);
-    }
-    this.setState({ planning: newData });
-  }
-
-  renderList() {
-    let sortedArray = [];
-
-    const { planning } = this.state;
-    Object.keys(planning).map((date) => {
-      const dayOperations = planning[date];
-      const actualDay = new Date(date);
-      const filteredOperations = dayOperations.filter(
-        (operation) => !operation.done
-      );
-      if (filteredOperations.length > 0) {
-        let operations = filteredOperations.map((operation) => {
-          const color = operation.template.color;
-          Object.assign(operation, { color: color ? color : "#2089dc" });
-          return operation;
-        });
-        let item = {
-          title: DaysOfWeek[actualDay.getDay()] + " - " + date,
-          data: operations,
-        };
-        sortedArray.push(item);
-      }
-    });
-
-    // while (iDate.getDate() !== end.getDate()) {
-    //     console.log(`${iDate.getFullYear()}-${("0" + (iDate.getMonth() + 1)).slice(-2)}-${("0" + iDate.getDate()).slice(-2)}`);
-    //
-    //
-    //     const day = DaysOfWeek[iDate.getDay()];
-    //     planning[day].map((operation) => {
-    //         Object.assign(operation, {color: "#2089dc"});
-    //         let item = {
-    //             title: day + `${iDate.getFullYear()}-${("0" + (iDate.getMonth() + 1)).slice(-2)}-${("0" + iDate.getDate()).slice(-2)}`,
-    //             data: {...operation, color: "#2089dc"}
-    //         };
-    //         // console.log(item);
-    //         sortedArray.push(item);
-    //     });
-    //
-    //     iDate.setDate(iDate.getDate() + 1);
-    // }
-
-    // document.write('<br>5 days ago was: ' + d.toLocaleString());
-    // for (let i = 0; i < DaysOfWeek.length; i++) {
-    //     let d = new Date();
-    //     d.setDate(d.getDate());
-    //     let toShow = this.state.planning.filter((item) => {
-    //         if (item.day === DaysOfWeek[i] && !item.done)
-    //             return item;
-    //     });
-    //     if (toShow.length > 0) {
-    //         const todayDayNumber = d.getDay();
-    //         const differenceToNewDay = todayDayNumber - i;
-    //         d.setDate(d.getDate() - differenceToNewDay);
-    //         const startTitle = differenceToNewDay === 0 ? "Today - " : "";
-    //         let item = {
-    //             title: startTitle + DaysOfWeek[i] + ` - ${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${("0" + d.getDate()).slice(-2)}`,
-    //             data: toShow
-    //         };
-    //         sortedArray.push(item);
-    //     }
-    // }
-    //
-    // console.log(sortedArray);
-
-    // for (let i = 0; i < DaysOfWeek.length; i++) {
-    //     let d = new Date();
-    //     let secondWeekElement = this.state.sections.filter((item) => {
-    //         if (item.day === DaysOfWeek[i])
-    //             return item;
-    //         if (item.done) {
-    //             item.color = "#2089dc";
-    //             item.done = false;
-    //         }
-    //     });
-    //     if (secondWeekElement.length > 0) {
-    //         const todayDayNumber = d.getDay();
-    //         const differenceToNewDay = todayDayNumber - i;
-    //         d.setDate(d.getDate() - differenceToNewDay);
-    //         let item = {
-    //             title: DaysOfWeek[i] + ` - ${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${("0" + d.getDate()).slice(-2)}`,
-    //             data: secondWeekElement
-    //         };
-    //         sortedArray.push(item);
-    //     }
-    // }
-
-    // const {planning} = this.state;
-    //
-    // Object.keys(planning).map((day) => {
-    //     let d = new Date();
-    //     const todayDayNumber = d.getDay();
-    //     const differenceToNewDay = todayDayNumber - DaysOfWeek.findIndex((index) => index === day);
-    //     d.setDate(d.getDate() - differenceToNewDay);
-    //     d.setDate(d.getDate() + 7);
-    //     planning[day].map((operation) => {
-    //         let item = {
-    //             title: day + ` - ${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${("0" + d.getDate()).slice(-2)}`,
-    //             data: {...operation, color: "#2089dc"}
-    //         };
-    //         sortedArray.push(item);
-    //     })
-    // });
-
-    const { navigate } = this.props.navigation;
-    ScreenOrientation.lockAsync(OrientationLock.PORTRAIT_UP).then(() => {});
-    return (
-      <ScrollView>
-        <SuperGridSectionList
-          itemDimension={120}
-          //staticDimension={500}
-          // fixed
-          // spacing={20}
-          sections={sortedArray}
-          refreshControl={
-            <RefreshControl
-              refreshing={this.state.refreshing}
-              onRefresh={this._onRefresh}
-            />
-          }
-          style={styles.gridView}
-          renderItem={({ item, section, index }) => {
-            const distance = this.getDistance(item.place.geoCoords);
-            return (
-              <TouchableOpacity
-                onPress={() =>
-                  navigate("JobInformation", {
-                    job: item,
-                    name: "dams",
-                    initialDate: section.title.substr(-10, 10),
-                  })
-                }
-                style={[styles.itemContainer, { backgroundColor: item.color }]}
-              >
-                <Text style={styles.itemName}>{item.place.name}</Text>
-                <Text style={styles.itemCode}>{item.template.name}</Text>
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  {Platform.OS === "ios" && distance ? (
-                    <Text style={styles.itemCode}>
-                      {distance.toFixed(2)}km
-                    </Text>
-                  ) : null}
-                  {item.done ? <Icon name="check" type="feather" /> : null}
-                </View>
-              </TouchableOpacity>
-            );
-          }}
-          renderSectionHeader={({ section }) => (
-            <Text style={styles.sectionHeader}>{section.title}</Text>
-          )}
-        />
-        <DropdownAlert
-          style={{ zIndex: 20 }}
-          ref={(ref) => (this.dropdown = ref)}
-        />
-      </ScrollView>
-    );
-  }
-
-  render() {
-    const version = (
-      <Text style={{ marginLeft: "auto", marginRight: "auto", fontSize: 12 }}>
-        {config().version}
-      </Text>
-    );
-    const { planning } = this.state;
-    if (planning) {
-      const condition = Object.keys(planning).every(
-        (day) => planning[day].length === 0
-      );
-      if (!condition) {
+      headerShown: true,
+      headerLeft: () => {
         return (
-          <>
-            <View style={styles.container}>{this.renderList()}</View>
-            {version}
-          </>
-        );
-      } else {
-        return (
-          <View style={styles.textContainer}>
-            <Text style={{ fontSize: 30 }}>You have no job</Text>
-            {version}
-          </View>
-        );
-      }
-    } else {
-      return (
-        <SafeAreaView
-          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-        >
-          <View style={styles.imageWrapper}>
-            <LottieView
-              ref={(animation) => {
-                this.animation = animation;
+          <TouchableOpacity onPress={async () => await Updates.reloadAsync()}>
+            <View
+              style={{
+                height: 45,
+                width: 45,
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: Platform.OS === "android" ? 10 : 0,
               }}
-              style={styles.animationWrapper}
-              source={require("../assets/5340-line-loader")}
-              loop
-            />
-          </View>
-          {version}
-        </SafeAreaView>
+            >
+              <Icon name="refresh-ccw" type="feather" />
+            </View>
+          </TouchableOpacity>
+        );
+      },
+      headerRight: () => {
+        return (
+          <TouchableOpacity onPress={() => logout()}>
+            <View
+              style={{
+                height: 45,
+                width: 45,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Icon name="log-out" type="feather" />
+            </View>
+          </TouchableOpacity>
+        );
+      },
+    });
+  }, []);
+
+  React.useEffect(() => {
+    loadPlanning();
+    ScreenOrientation.lockAsync(OrientationLock.PORTRAIT_UP).then(() => {});
+  }, []);
+
+  const [planningResponse, setPlanningResponse] = React.useState(null);
+  const [planning, setPlanning] = React.useState(null);
+
+  const loadPlanning = React.useCallback(() => {
+    AsyncStorage.getItem("token").then((token) => {
+      fetch(`${config().apiUrl}/api/cleaner/operations/?flat=false`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          token,
+        },
+      })
+        .then((response) => response.json())
+        .then((responseJson) => {
+          setPlanningResponse(responseJson);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    });
+  }, []);
+
+  React.useEffect(() => {
+    if (planningResponse)
+      setPlanning(JSON.parse(JSON.stringify(planningResponse)));
+  }, [location, planningResponse]);
+
+  React.useEffect(() => {
+    if (location) console.log("GOT A LOCATION !", location);
+  }, [location]);
+
+  const hasJobs = React.useMemo(() => {
+    return (
+      planning && Object.keys(planning).some((day) => planning[day].length > 0)
+    );
+  }, [planning]);
+
+  if (planning) {
+    if (!hasJobs) {
+      return (
+        <View style={styles.textContainer}>
+          <Text style={{ fontSize: 30 }}>You have no job</Text>
+          <ShowVersion />
+        </View>
       );
     }
+    return (
+      <HomePlanningList
+        planning={planning}
+        onRefresh={() => {
+          loadPlanning();
+        }}
+        getDistance={getDistance}
+      />
+    );
   }
-}
 
-export default withNavigation(HomeScreen);
+  return (
+    <SafeAreaView
+      style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+    >
+      <View style={styles.imageWrapper}>
+        <LottieView
+          ref={(animation) => {
+            animationRef.current = animation;
+          }}
+          style={styles.animationWrapper}
+          source={require("../assets/5340-line-loader")}
+          loop
+        />
+      </View>
+      <ShowVersion />
+    </SafeAreaView>
+  );
+};
+
+export default HomeScreen;
 
 const styles = StyleSheet.create({
   gridView: {

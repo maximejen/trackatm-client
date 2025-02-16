@@ -5,192 +5,82 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
-  Text,
-  Platform,
+  Text, Platform,
 } from "react-native";
 import { Button, Icon } from "react-native-elements";
-import TaskInputText from "../components/TaskInputText";
-import TaskInputPicture from "../components/TaskInputPicture";
-import { withNavigation } from "react-navigation";
 import { requestOperationDone } from "../utils/TasksRequests";
 import LottieView from "lottie-react-native";
+import { useNavigation } from "@react-navigation/native";
+import Task from "../components/Task";
 
-class TasksScreen extends React.Component {
-  state = {
-    data: null,
-    beginningDate: Date.now(),
-    job: this.props.navigation.state.params.job,
-    sending: false,
-  };
+const TasksScreen = ({ route }) => {
+  const navigation = useNavigation();
+  const { job, tasks } = route.params;
 
-  constructor(props) {
-    super(props);
-    this.handleChecked = this.handleChecked.bind(this);
-    this.handleText = this.handleText.bind(this);
-    this.handlePicture = this.handlePicture.bind(this);
-    this.handleDeletePicture = this.handleDeletePicture.bind(this);
-    this.createTasks(this.props.navigation.state.params.tasks);
-  }
+  const beginningDate = React.useRef(Date.now());
+  const [sending, setSending] = React.useState(false);
 
-  static navigationOptions = ({ navigation }) => {
-    const { state } = navigation;
-    return {
-      title: "Tasks",
-      headerStyle: {
-        marginTop: Platform.OS !== "android" ? 20 : undefined,
-      },
-      headerLeft: (
-        <TouchableOpacity
-          onPress={() => this.goBack(navigation)}
-          style={{
-            height: 45,
-            width: 45,
-            alignItems: "center",
-            justifyContent: "center",
-            margin: 10,
-          }}
-        >
-          <Icon name="arrow-left" type="feather" />
-        </TouchableOpacity>
-      ),
-    };
-  };
-
-  static goBack(navigation) {
-    const { navigate } = navigation;
-
-    Alert.alert(
-      "Leaving",
-      "You are going to leave, tasks will not be saved",
-      [
-        {
-          text: "Cancel",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel",
-        },
-        { text: "Leave", onPress: () => navigate("Home") },
-      ],
-      { cancelable: false }
-    );
-  }
-
-  createTasks(task) {
-    let newTask = [];
-    for (let i = 0; i < task.length; i++) {
-      let item = {
-        imageForced: task[i].imagesForced,
-        key: task[i].name,
-        comment: task[i].comment,
+  const [tasksList, setTasksList] = React.useState(
+    tasks.map((task) => {
+      return {
+        imageForced: task.imagesForced,
+        key: task.name,
+        comment: task.comment,
         checked: false,
         content: null,
         text: "",
       };
-      newTask.push(item);
-    }
-    this.state = {
-      data: newTask,
-      beginningDate: Date.now(),
-      job: this.props.navigation.state.params.job,
-      sending: false,
-    };
-  }
+    }),
+  );
 
-  async sendTasksToServer() {
+  React.useEffect(() => {
+    navigation.setOptions({
+      title: "Tasks",
+      headerShown: true,
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => {
+            Alert.alert(
+              "Leaving",
+              "You are going to leave, job will not be saved",
+              [
+                {
+                  text: "Cancel",
+                  onPress: () => console.log("Cancel Pressed"),
+                  style: "cancel",
+                },
+                { text: "Leave", onPress: () => navigation.navigate("Home") },
+              ],
+              { cancelable: true },
+            );
+          }}
+        >
+          <View
+            style={{
+              height: 45,
+              width: 45,
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: Platform.OS === "android" ? 10 : 0,
+            }}
+          >
+            <Icon name="arrow-left" type="feather" />
+          </View>
+        </TouchableOpacity>
+      ),
+    });
+  }, []);
+
+  const sendTasksToServer = React.useCallback(() => {
     const { navigate } = this.props.navigation;
-    this.setState({
-      sending: true,
-    });
-    this.animation.play();
+    setSending(true);
 
-    await requestOperationDone(
-      this.state.beginningDate,
-      this.state.data,
-      this.state.job,
-      navigate
-    ).done(() => {});
-  }
-
-  handleText(id, text) {
-    let data = this.state.data;
-    data[id].text = text;
-    this.setState({
-      data: data,
-    });
-  }
-
-  handlePicture(id, picture) {
-    let data = this.state.data;
-    if (!data[id].content) data[id].content = [];
-    if (!data[id].date) data[id].date = [];
-    data[id].content.push(picture);
-    data[id].date.push(Date.now());
-    this.setState({
-      data: data,
-    });
-  }
-
-  handleDeletePicture(id, idx) {
-    let data = this.state.data;
-    data[id].content.splice(idx, 1);
-    this.setState({
-      data: data,
-    });
-  }
-
-  handleChecked(id) {
-    let data = this.state.data;
-    data[id].checked = !data[id].checked;
-    this.setState({
-      data: data,
-    });
-  }
-
-  renderText(item, index) {
-    return (
-      <TaskInputText
-        title={item.key}
-        checked={item.checked}
-        comment={item.comment}
-        id={index}
-        item={item}
-        handleChecked={this.handleChecked}
-        handleText={this.handleText}
-        iconRight
-        onPress={() => (item.checked = !item.checked)}
-      />
+    requestOperationDone(beginningDate.current, tasksList, job, navigate).done(
+      () => {},
     );
-  }
+  }, [tasksList, job, beginningDate]);
 
-  renderPicture(item, index) {
-    try {
-      return (
-        <View>
-          <TaskInputPicture
-            title={item.key}
-            checked={item.checked}
-            comment={item.comment}
-            id={index}
-            item={item}
-            handleChecked={this.handleChecked}
-            handlePicture={this.handlePicture}
-            handleText={this.handleText}
-            handleDeletePicture={this.handleDeletePicture}
-            iconRight
-            onPress={() => (item.checked = !item.checked)}
-          />
-        </View>
-      );
-    } catch {
-      return <View></View>;
-    }
-  }
-
-  renderItems(item, index) {
-    if (!item.imageForced) return this.renderText(item, index);
-    else return this.renderPicture(item, index);
-  }
-
-  taskValidation() {
+  const handleTaskValidation = React.useCallback(() => {
     Alert.alert(
       "Task validation",
       "Do you want to validate these tasks ? You can't change tasks after validation",
@@ -200,54 +90,105 @@ class TasksScreen extends React.Component {
           onPress: () => console.log("Cancel Pressed"),
           style: "cancel",
         },
-        { text: "OK", onPress: () => this.sendTasksToServer() },
+        { text: "OK", onPress: () => sendTasksToServer() },
       ],
-      { cancelable: false }
+      { cancelable: false },
     );
-  }
+  }, []);
 
-  render() {
-    if (!this.state.data) {
-      return <View />;
-    } else if (this.state.sending) {
-      return (
-        <View
-          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-        >
-          <Text style={styles.textData}>Sending task, please wait</Text>
-          <View style={styles.imageWrapper}>
-            <LottieView
-              ref={(animation) => {
-                this.animation = animation;
-              }}
-              style={styles.animationWrapper}
-              source={require("../assets/5340-line-loader")}
-              loop
-            />
-          </View>
-        </View>
-      );
-    }
+  const handleTaskChecked = React.useCallback(
+    (idx) => {
+      const newList = [...tasksList];
+      const task = newList[idx];
+      task.checked = !task.checked;
+      setTasksList(newList);
+    },
+    [tasksList],
+  );
+
+  const handleTaskTextChange = React.useCallback(
+    (idx, text) => {
+      const newList = [...tasksList];
+      const task = newList[idx];
+      task.text = text;
+      setTasksList(newList);
+    },
+    [tasksList],
+  );
+
+  const handleTaskPicture = React.useCallback(
+    (idx, picture) => {
+      const newList = [...tasksList];
+      const task = newList[idx];
+      if (!task.content) task.content = [];
+      if (!task.date) task.date = [];
+      task.content.push(picture);
+      task.date.push(Date.now());
+      setTasksList(newList);
+    },
+    [tasksList],
+  );
+
+  const handleTaskDeletePicture = React.useCallback(
+    (idx, pictureIdx) => {
+      const newList = [...tasksList];
+      const task = newList[idx];
+      task.content.splice(pictureIdx, 1);
+      setTasksList(newList);
+    },
+    [tasksList],
+  );
+
+  if (sending) {
     return (
-      <View style={styles.container}>
-        <FlatList
-          style={{ flex: 1 }}
-          data={this.state.data}
-          renderItem={({ item, index }) => this.renderItems(item, index)}
-        />
-        <View style={styles.buttonOpenMap}>
-          <Button
-            title="Validate tasks"
-            type="solid"
-            onPress={() => this.taskValidation()}
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <Text style={styles.textData}>Sending task, please wait</Text>
+        <View style={styles.imageWrapper}>
+          <LottieView
+            ref={(animation) => {
+              if (animation) animation.play();
+            }}
+            style={styles.animationWrapper}
+            source={require("../assets/5340-line-loader")}
+            loop
           />
         </View>
       </View>
     );
   }
-}
 
-export default withNavigation(TasksScreen);
+  if (!tasksList) {
+    return <View />;
+  }
+
+  return (
+    <View style={styles.container}>
+      <FlatList
+        style={{ flex: 1 }}
+        data={tasksList}
+        renderItem={({ item, index }) => (
+          <Task
+            key={"task" + index}
+            task={item}
+            onChecked={handleTaskChecked}
+            onTextChange={handleTaskTextChange}
+            onAddPicture={handleTaskPicture}
+            onDeletePicture={handleTaskDeletePicture}
+          />
+        )}
+      />
+      <View style={styles.buttonOpenMap}>
+        <Button
+          title="Validate tasks"
+          type="solid"
+          onPress={handleTaskValidation}
+        />
+      </View>
+    </View>
+  );
+};
+
+export default TasksScreen;
 
 const styles = StyleSheet.create({
   buttonOpenMap: {
