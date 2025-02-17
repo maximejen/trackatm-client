@@ -76,8 +76,6 @@ const HomeScreen = () => {
           <TouchableOpacity onPress={async () => await Updates.reloadAsync()}>
             <View
               style={{
-                height: 45,
-                width: 45,
                 alignItems: "center",
                 justifyContent: "center",
                 marginRight: Platform.OS === "android" ? 10 : 0,
@@ -93,8 +91,6 @@ const HomeScreen = () => {
           <TouchableOpacity onPress={() => logout()}>
             <View
               style={{
-                height: 45,
-                width: 45,
                 alignItems: "center",
                 justifyContent: "center",
               }}

@@ -11,7 +11,7 @@ export const requestOperationDone = async (
   beginningDate,
   data,
   job,
-  navigate
+  navigate,
 ) => {
   //send: operation id et operationTemplate id, date debut, date fin,
   nbImages = getNbImages(data);
@@ -110,14 +110,7 @@ const sendPictures = (taskOperationId, userToken, item) => {
     let match = /\.(\w+)$/.exec(filename);
     let type = match ? `image/${match[1]}` : `image`;
     formData.append("image", { uri: localUri, name: filename, type });
-    const url =
-      config().apiUrl +
-      "/api/operation/image/" +
-      taskOperationId +
-      "?timestamp=" +
-      item.date[idx] / 1000 +
-      "&version=" +
-      config().version;
+    const url = `${config().apiUrl}/api/operation/image/${taskOperationId}?timestamp=${item.date[idx] / 1000}&version=${config().version}`;
     fetch(url, {
       method: "POST",
       headers: {
@@ -138,7 +131,7 @@ function waitForRequests() {
   if (currentImage < nbImages) {
     window.setTimeout(
       waitForRequests,
-      100
+      100,
     ); /* this checks the flag every 100 milliseconds*/
   } else {
     sendMailRequest();

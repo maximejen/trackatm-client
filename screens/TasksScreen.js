@@ -5,7 +5,8 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
-  Text, Platform,
+  Text,
+  Platform,
 } from "react-native";
 import { Button, Icon } from "react-native-elements";
 import { requestOperationDone } from "../utils/TasksRequests";
@@ -20,12 +21,10 @@ const TasksScreen = ({ route }) => {
   const beginningDate = React.useRef(Date.now());
   const [sending, setSending] = React.useState(false);
 
-  const [tasksList, setTasksList] = React.useState(
+  const tasksList = React.useRef(
     tasks.map((task) => {
       return {
-        imageForced: task.imagesForced,
-        key: task.name,
-        comment: task.comment,
+        ...task,
         checked: false,
         content: null,
         text: "",
@@ -57,8 +56,6 @@ const TasksScreen = ({ route }) => {
         >
           <View
             style={{
-              height: 45,
-              width: 45,
               alignItems: "center",
               justifyContent: "center",
               marginRight: Platform.OS === "android" ? 10 : 0,
@@ -75,10 +72,13 @@ const TasksScreen = ({ route }) => {
     const { navigate } = this.props.navigation;
     setSending(true);
 
-    requestOperationDone(beginningDate.current, tasksList, job, navigate).done(
-      () => {},
-    );
-  }, [tasksList, job, beginningDate]);
+    requestOperationDone(
+      beginningDate.current,
+      tasksList.current,
+      job,
+      navigate,
+    ).done(() => {});
+  }, [job, beginningDate]);
 
   const handleTaskValidation = React.useCallback(() => {
     Alert.alert(
@@ -97,44 +97,44 @@ const TasksScreen = ({ route }) => {
   }, []);
 
   const handleTaskChecked = React.useCallback(
-    (idx) => {
-      const newList = [...tasksList];
-      const task = newList[idx];
-      task.checked = !task.checked;
-      setTasksList(newList);
+    (idx, value) => {
+      const task = tasksList.current[idx];
+      if (task) {
+        task.checked = value;
+      }
     },
     [tasksList],
   );
 
   const handleTaskTextChange = React.useCallback(
     (idx, text) => {
-      const newList = [...tasksList];
-      const task = newList[idx];
-      task.text = text;
-      setTasksList(newList);
+      const task = tasksList.current[idx];
+      if (task) {
+        task.text = text;
+      }
     },
     [tasksList],
   );
 
   const handleTaskPicture = React.useCallback(
     (idx, picture) => {
-      const newList = [...tasksList];
-      const task = newList[idx];
-      if (!task.content) task.content = [];
-      if (!task.date) task.date = [];
-      task.content.push(picture);
-      task.date.push(Date.now());
-      setTasksList(newList);
+      const task = tasksList.current[idx];
+      if (task) {
+        if (!task.content) task.content = [];
+        if (!task.date) task.date = [];
+        task.content.push(picture);
+        task.date.push(Date.now());
+      }
     },
     [tasksList],
   );
 
   const handleTaskDeletePicture = React.useCallback(
     (idx, pictureIdx) => {
-      const newList = [...tasksList];
-      const task = newList[idx];
-      task.content.splice(pictureIdx, 1);
-      setTasksList(newList);
+      const task = tasksList.current[idx];
+      if (task) {
+        task.content.splice(pictureIdx, 1);
+      }
     },
     [tasksList],
   );
@@ -157,7 +157,7 @@ const TasksScreen = ({ route }) => {
     );
   }
 
-  if (!tasksList) {
+  if (!tasksList.current) {
     return <View />;
   }
 
@@ -165,11 +165,12 @@ const TasksScreen = ({ route }) => {
     <View style={styles.container}>
       <FlatList
         style={{ flex: 1 }}
-        data={tasksList}
+        data={tasksList.current}
         renderItem={({ item, index }) => (
           <Task
             key={"task" + index}
             task={item}
+            index={index}
             onChecked={handleTaskChecked}
             onTextChange={handleTaskTextChange}
             onAddPicture={handleTaskPicture}

@@ -51,12 +51,12 @@ const RootStack = createNativeStackNavigator({
     AuthLoadingScreen: { screen: AuthLoadingScreen },
     JobInformation: { screen: JobInformationsScreen },
     Tasks: { screen: TasksScreen },
-    // TaskCamera: {
-    //   screen: TaskCamera,
-    //   navigationOptions: {
-    //     headerShown: false,
-    //   },
-    // },
+    TaskCamera: {
+      screen: TaskCamera,
+      navigationOptions: {
+        headerShown: false,
+      },
+    },
   },
 });
 
