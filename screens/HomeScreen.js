@@ -78,7 +78,7 @@ const HomeScreen = () => {
               style={{
                 alignItems: "center",
                 justifyContent: "center",
-                marginRight: Platform.OS === "android" ? 10 : 0,
+                marginRight: Platform.OS === "android" ? 30 : 0,
               }}
             >
               <Icon name="refresh-ccw" type="feather" />

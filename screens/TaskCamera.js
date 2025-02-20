@@ -1,13 +1,13 @@
 import React from "react";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { Dimensions, TouchableOpacity, View, Text } from "react-native";
-import DropdownAlert, { DropdownAlertType } from "react-native-dropdownalert";
+import {Dimensions, TouchableOpacity, View, Text, Platform} from "react-native";
+import { DropdownAlertType } from "react-native-dropdownalert";
 import { Icon } from "react-native-elements";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { OrientationLock } from "expo-screen-orientation/src/ScreenOrientation.types";
 import { useNavigation } from "@react-navigation/native";
 import { useAlertContext } from "../components/AlertContext";
-import { manipulateAsync, useImageManipulator } from "expo-image-manipulator";
+import { calcWidth } from "../utils/deviceResponsiveHelper";
 
 const TaskCamera = ({ route, ...props }) => {
   const navigation = useNavigation();
@@ -84,7 +84,25 @@ const TaskCamera = ({ route, ...props }) => {
 
   if (hasCameraPermission !== "granted")
     return (
-      <Text>You need to provide access to the camera to take picture.</Text>
+      <View
+        style={{
+          flex: 1,
+          height: "100%",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#000",
+          padding: calcWidth(5),
+        }}
+      >
+        <Text
+          style={{
+            color: "white",
+            textAlign: "center",
+          }}
+        >
+          You need to provide access to the camera to take pictures.
+        </Text>
+      </View>
     );
   else
     return (
@@ -94,8 +112,8 @@ const TaskCamera = ({ route, ...props }) => {
           facing={"back"}
           style={{ flex: 1 }}
           ref={cameraRef}
-          flashOn={flashOn}
-          enableTorch={flashOn}
+          flashOn={true}
+          enableTorch={Platform.OS === "ios" ? (!cameraReady || flashOn) : flashOn}
           onCameraReady={() => {
             setCameraReady(true);
           }}

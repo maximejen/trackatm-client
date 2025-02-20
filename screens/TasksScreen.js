@@ -7,11 +7,12 @@ import {
   Alert,
   Text,
   Platform,
+  BackHandler,
 } from "react-native";
 import { Button, Icon } from "react-native-elements";
 import { requestOperationDone } from "../utils/TasksRequests";
 import LottieView from "lottie-react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, usePreventRemove } from "@react-navigation/native";
 import Task from "../components/Task";
 
 const TasksScreen = ({ route }) => {
@@ -36,36 +37,35 @@ const TasksScreen = ({ route }) => {
     navigation.setOptions({
       title: "Tasks",
       headerShown: true,
-      headerLeft: () => (
-        <TouchableOpacity
-          onPress={() => {
-            Alert.alert(
-              "Leaving",
-              "You are going to leave, job will not be saved",
-              [
-                {
-                  text: "Cancel",
-                  onPress: () => console.log("Cancel Pressed"),
-                  style: "cancel",
-                },
-                { text: "Leave", onPress: () => navigation.navigate("Home") },
-              ],
-              { cancelable: true },
-            );
-          }}
-        >
-          <View
-            style={{
-              alignItems: "center",
-              justifyContent: "center",
-              marginRight: Platform.OS === "android" ? 10 : 0,
-            }}
-          >
-            <Icon name="arrow-left" type="feather" />
-          </View>
-        </TouchableOpacity>
-      ),
     });
+  }, []);
+
+  const onBackPress = React.useCallback(() => {
+    Alert.alert(
+      "Leaving",
+      "You are going to leave, job will not be saved",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel",
+        },
+        { text: "Leave", onPress: () => navigation.navigate("Home") },
+      ],
+      { cancelable: true },
+    );
+
+    return true;
+  }, []);
+
+  usePreventRemove(true, onBackPress);
+
+  React.useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress,
+    );
+    return () => backHandler.remove();
   }, []);
 
   const sendTasksToServer = React.useCallback(() => {
