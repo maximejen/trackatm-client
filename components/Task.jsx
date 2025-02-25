@@ -135,7 +135,6 @@ const Task = ({
               onPress={() => setChecked(!checked)}
             >
               <Icon name={checked ? "check-square" : "square"} type="feather" />
-              ;
             </TouchableOpacity>
           </View>
         </View>

@@ -8,7 +8,7 @@
       "android"
     ],
     "newArchEnabled": true,
-    "version": "3.4.1",
+    "version": "1.3.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "splash": {
@@ -42,10 +42,12 @@
       ]
     ],
     "android": {
-      "package": "com.holdco.holdco",
-      "versionCode": 9,
+      "package": "com.maximejenny.trackatm",
+      "versionCode": 1,
       "permissions": [
-        "CAMERA"
+        "CAMERA",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
       ],
       "blockedPermissions": [
         "android.permission.REQUEST_INSTALL_PACKAGES"

@@ -9,10 +9,14 @@ let operationId;
 let navigateGlob = null;
 export const requestOperationDone = async (
   beginningDate,
-  data,
+  tasksList,
   job,
   navigate,
 ) => {
+  const data = tasksList.map((task) => {
+    return { ...task, content: null };
+  });
+
   //send: operation id et operationTemplate id, date debut, date fin,
   nbImages = getNbImages(data);
   dataSize = data.length;
@@ -24,15 +28,19 @@ export const requestOperationDone = async (
   const cleanerId = await AsyncStorage.getItem("cleanerid");
 
   const body = JSON.stringify({
-    beginningDate: beginningDate / 1000,
-    endingDate: Date.now() / 1000,
+    beginningDate: parseInt(beginningDate / 1000),
+    endingDate: parseInt(Date.now() / 1000),
     operationId: job.id,
     operationTemplateId: job.template.id,
     initialDate: job.initialDate,
     tasks: data,
   });
 
-  fetch(config().apiUrl + "/api/operation/history/create/" + cleanerId, {
+  console.log(`${config().apiUrl}/api/operation/history/create/${cleanerId}`);
+  console.log(body);
+  console.log(userToken);
+
+  fetch(`${config().apiUrl}/api/operation/history/create/${cleanerId}`, {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -41,13 +49,16 @@ export const requestOperationDone = async (
     },
     body: body,
   })
-    .then((response) => response.json())
+    .then((response) => {
+      console.log(response);
+      return response.json();
+    })
     .then((responseJson) => {
       if (responseJson["success"] === "true") {
         operationId = responseJson.historyId;
         responseJson["tasksIds"].map((taskId, index) => {
-          if (data[index].content !== null) {
-            sendPictures(taskId, userToken, data[index]);
+          if (tasksList[index].content !== null) {
+            sendPictures(taskId, userToken, tasksList[index]);
           }
         });
         waitForRequests();
@@ -104,7 +115,8 @@ const sendPictures = (taskOperationId, userToken, item) => {
   item.content.forEach((elem, idx) => {
     const formData = new FormData();
 
-    let localUri = elem.uri;
+    console.log(elem);
+    let localUri = elem.localUri || elem.uri;
     let filename = Date.now() + localUri.split("/").pop();
 
     let match = /\.(\w+)$/.exec(filename);

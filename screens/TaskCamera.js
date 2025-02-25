@@ -8,6 +8,7 @@ import { OrientationLock } from "expo-screen-orientation/src/ScreenOrientation.t
 import { useNavigation } from "@react-navigation/native";
 import { useAlertContext } from "../components/AlertContext";
 import { calcWidth } from "../utils/deviceResponsiveHelper";
+import {manipulateAsync} from "expo-image-manipulator";
 
 const TaskCamera = ({ route, ...props }) => {
   const navigation = useNavigation();
@@ -61,7 +62,7 @@ const TaskCamera = ({ route, ...props }) => {
         .takePictureAsync(options)
         .then((photo) => {
           const process = [{ resize: { width: 300 } }];
-          if (photo.width > photo.height) process.unshift({ rotate: 90 });
+          if (photo.width > photo.height && Platform.OS === "ios") process.unshift({ rotate: 90 });
           const uri = photo.localUri || photo.uri;
           manipulateAsync(uri, process, { compress: 0.9 }).then(
             (manipResult) => {
@@ -111,6 +112,7 @@ const TaskCamera = ({ route, ...props }) => {
           mode={"picture"}
           facing={"back"}
           style={{ flex: 1 }}
+          ratio={"4:3"}
           ref={cameraRef}
           flashOn={true}
           enableTorch={Platform.OS === "ios" ? (!cameraReady || flashOn) : flashOn}

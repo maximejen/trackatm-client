@@ -34,7 +34,7 @@ const PlanningItem = ({ item, section, getDistance, itemWidth }) => {
       onPress={() => {
         navigate("JobInformation", {
           job: item,
-          initialDate: section.title.substring(-10, 10),
+          initialDate: section.title.substr(-10, 10),
         });
       }}
       style={[

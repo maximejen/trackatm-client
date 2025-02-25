@@ -9,7 +9,6 @@ import AuthLoadingScreen from "./screens/AuthLoadingScreen";
 import JobInformationsScreen from "./screens/JobInformations";
 import TasksScreen from "./screens/TasksScreen";
 import TaskCamera from "./screens/TaskCamera";
-import DropdownAlert from "react-native-dropdownalert";
 import AlertContextProvider from "./components/AlertContext";
 
 // const MainNavigator = createStackNavigator(

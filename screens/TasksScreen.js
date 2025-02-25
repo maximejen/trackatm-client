@@ -26,6 +26,7 @@ const TasksScreen = ({ route }) => {
     tasks.map((task) => {
       return {
         ...task,
+        key: task.name,
         checked: false,
         content: null,
         text: "",
@@ -69,15 +70,14 @@ const TasksScreen = ({ route }) => {
   }, []);
 
   const sendTasksToServer = React.useCallback(() => {
-    const { navigate } = this.props.navigation;
     setSending(true);
 
     requestOperationDone(
       beginningDate.current,
       tasksList.current,
       job,
-      navigate,
-    ).done(() => {});
+      navigation.navigate,
+    ).then(() => {});
   }, [job, beginningDate]);
 
   const handleTaskValidation = React.useCallback(() => {
