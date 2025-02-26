@@ -42,7 +42,6 @@
       ]
     ],
     "android": {
-      "package": "com.maximejenny.trackatm",
       "versionCode": 1,
       "permissions": [
         "CAMERA",
@@ -51,7 +50,8 @@
       ],
       "blockedPermissions": [
         "android.permission.REQUEST_INSTALL_PACKAGES"
-      ]
+      ],
+      "package": "com.maximejenny.trackatm"
     },
     "extra": {
       "eas": {
