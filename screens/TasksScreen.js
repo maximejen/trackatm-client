@@ -27,6 +27,7 @@ const TasksScreen = ({ route }) => {
       return {
         ...task,
         key: task.name,
+        imageForced: task.imagesForced,
         checked: false,
         content: null,
         text: "",

@@ -42,7 +42,7 @@
       ]
     ],
     "android": {
-      "versionCode": 1,
+      "versionCode": 2,
       "permissions": [
         "CAMERA",
         "ACCESS_COARSE_LOCATION",
@@ -51,7 +51,12 @@
       "blockedPermissions": [
         "android.permission.REQUEST_INSTALL_PACKAGES"
       ],
-      "package": "com.maximejenny.trackatm"
+      "package": "com.maximejenny.trackatm",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyA-r7eUBkjR4k1ajr9Ye4DiY2LLpK0QwHc"
+        }
+      }
     },
     "extra": {
       "eas": {

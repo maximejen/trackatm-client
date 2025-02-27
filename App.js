@@ -10,6 +10,7 @@ import JobInformationsScreen from "./screens/JobInformations";
 import TasksScreen from "./screens/TasksScreen";
 import TaskCamera from "./screens/TaskCamera";
 import AlertContextProvider from "./components/AlertContext";
+import {StatusBar} from "react-native";
 
 // const MainNavigator = createStackNavigator(
 //   {
@@ -43,6 +44,7 @@ const RootStack = createNativeStackNavigator({
   screenOptions: {
     gesturesEnabled: false,
     headerShown: false,
+    headerTintColor: "black",
   },
   screens: {
     Home: { screen: HomeScreen },
@@ -50,12 +52,7 @@ const RootStack = createNativeStackNavigator({
     AuthLoadingScreen: { screen: AuthLoadingScreen },
     JobInformation: { screen: JobInformationsScreen },
     Tasks: { screen: TasksScreen },
-    TaskCamera: {
-      screen: TaskCamera,
-      navigationOptions: {
-        headerShown: false,
-      },
-    },
+    TaskCamera: { screen: TaskCamera },
   },
 });
 
@@ -64,14 +61,13 @@ const Navigation = createStaticNavigation(RootStack);
 const AlertContext = React.createContext(null);
 
 const App = () => {
-
   return (
     <>
       <AlertContextProvider>
+        <StatusBar barStyle="light-content" backgroundColor="black" />
         <Navigation screenOptions={{ headerShown: false }} />
       </AlertContextProvider>
     </>
   );
 };
 export default App;
-
